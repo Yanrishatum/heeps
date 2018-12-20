@@ -1,0 +1,7 @@
+-lib heaps
+-cp samples
+-cp .
+# -D analyzer-optimize
+--macro keep(".")
+-main Main
+--interp

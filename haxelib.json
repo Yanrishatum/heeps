@@ -1,0 +1,11 @@
+{
+  "name": "Heeps",
+  "license": "MIT",
+  "tags": ["heaps"],
+  "releasenote": "Initial release",
+  "version": "1.0.0",
+  "url": "http://github.com/yanrishatum/heeps",
+  "dependencies": { "heaps": "" },
+  "description": "A Heaps extension library with \"advanced\" features.",
+  "contributors": ["Yanrishatum"]
+}
