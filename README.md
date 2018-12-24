@@ -16,14 +16,19 @@ An "advanced" Heaps extension library.
 * `hxd.heaps` package user for internal Heaps features, like macro functions.
 
 ## Features
-* `h2d.Aniamtion` - An actually good animation compared to stock `h2d.Anim`. Allows per-frame delay configuration and some other features.
-* `h2d.FPS` - Based on OpenFL fps counter. Shows FPS (duh).
-* `h2d.Tilemap` - Basic Tilemap renderer. NOT PERFECT. It does not care about render-order and shit.
-* `h3d.scene.S2DPlane` - A 2D plane that renders s2d objects on it.
+### `h2d`
+* `Animation` - An actually good animation compared to stock `h2d.Anim`. Allows per-frame delay configuration and some other features.
+* `FPS` - Based on OpenFL fps counter. Shows FPS (duh).
+* `Tilemap` - Basic Tilemap renderer. NOT PERFECT. It does not care about render-order and shit.
+* `ui.*` - Small set of elements akin to Slider for debugging purposes. (Button with text, Checkbox, RadioButton)
+### `h3d`
+* `scene.S2DPlane` - A 2D plane that renders s2d objects on it.
+* `scene.Axes` - primitive (taken from Heaps samples) axis display.
+* `scene.TileSprite` - simple `h2d.Tile` renderer with pixels-per-unit scaling and capability to always face camera.
+### `hxd`
+* `res.GifImage` - Animated gif support with Res. Use `toAnimation` and `toFrames` to get animation data. `toImage` can be used to obtain spritesheet Image.
+* `res.TmxMap` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
 * `ManifestFileSystem` - js-oriented alternative to stupid embedding into .js file. More tricky to operate, and requires preloading. See below.
-* `h2d.ui` - Small set of elements akin to Slider for debugging purposes. (Button with text, Checkbox, RadioButton)
-* `hxd.res.GifImage` - Animated gif support with Res. Use `toAnimation` and `toFrames` to get animation data. `toImage` can be used to obtain spritesheet Image.
-* `hxd.res.TmxMap` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
 
 ### Manifest FS
 Since we are sane people and don't want 50+MB js file that contains Base64-encoded game assets, we obviously want to load those files separately. Manifest-FS provides ability to load those files from a manifest file.  
@@ -43,7 +48,7 @@ override private function loadAssets(onLoaded) {
   loader.loadManifestFiles();
 }
 ```
-Additionally, if you want to visualize loading progress, but don't want anything fancy - there is `h2d.ui.ManifestProgress` with primitive progress-bar if you don't neet any fancy mumbo-jumbo and just want your resources loaded while showing player that it actually loads.
+Additionally, if you want to visualize loading progress, but don't want anything fancy - there is `h2d.ui.ManifestProgress` with primitive progress-bar if you don't need any fancy mumbo-jumbo and just want your resources loaded while showing player that it actually loads.
 
 ## Extra flags
 * `-D gif_disable_margin` - Disables 1px top/bottom margin that avoids pixel bleeding for gif spritesheet generation.

@@ -1,7 +1,10 @@
 -lib heaps
+-lib hldx
 -cp samples
 -cp .
 # -D analyzer-optimize
---macro keep(".")
+-D resourcesPath=samples/res
+# --macro keep("")
+# --macro include("")
 -main Main
---interp
+-hl game.hl
