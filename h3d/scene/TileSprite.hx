@@ -9,6 +9,8 @@ class TileSprite extends Mesh
 {
   
   public var faceCamera:Bool;
+  // When false - will track camera on X and Y axes, but will always look at Z=0
+  public var faceZAxis:Bool;
   public var tile(default, set):Tile;
   var ppu:Float;
   public var pixelsPerUnit(default, set):Float;
@@ -17,6 +19,7 @@ class TileSprite extends Mesh
   public function new(tile:Tile, ppu:Float = 1, faceCamera:Bool = true, ?parent:Object)
   {
     this.faceCamera = faceCamera;
+    this.faceZAxis = true;
     this.plane = new PlanePrim(1, 1, X);
     var mat = Material.create(tile.getTexture());
     mat.blendMode = Alpha;
@@ -54,6 +57,7 @@ class TileSprite extends Mesh
     {
       var up = ctx.scene.camera.up;
       var vec = ctx.scene.camera.pos.sub(ctx.scene.camera.target);
+      if (!faceZAxis) vec.z = 0;
       // // var oldX = qRot.x;
       // // var oldY = qRot.y;
       // // var oldZ = qRot.z;
