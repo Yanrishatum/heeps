@@ -4,6 +4,9 @@ import h2d.Text;
 import h2d.HtmlText;
 import h2d.Object;
 
+/**
+  Vertically scrollable text container.
+**/
 class ScrollText extends Mask
 {
   
@@ -34,14 +37,15 @@ class ScrollText extends Mask
   function get_maxScrollV():Int
   {
     var v = Math.ceil(text.textHeight / scrollStep) - scrollVLimit();
-    if (v < 1) return 1;
+    if (v < 1) return 0;
     return v;
   }
   
   function get_bottomScrollV():Int
   {
+    if (text.textHeight < height) return Math.ceil(text.textHeight / scrollStep);
     var bottom:Float = text.y + text.textHeight;
-    if (bottom > height) scrollV + scrollVLimit() - 1;
+    if (bottom > height) return scrollV + scrollVLimit();
     return scrollV + Math.ceil(bottom / scrollStep);
   }
   
