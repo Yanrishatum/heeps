@@ -44,6 +44,7 @@ class ManifestProgress extends h2d.Object
       g.x = 0;
       text.maxWidth = 400;
     }
+    loader.loadManifestFiles();
   }
   
   function setProgress(b:Int, t:Int):Void
