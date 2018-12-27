@@ -3,7 +3,7 @@ package h2d.ui;
 import hxd.fs.ManifestFileSystem;
 import hxd.res.ManifestLoader;
 
-class ManifestProgress extends h2d.Object;
+class ManifestProgress extends h2d.Object
 {
   var g:h2d.Graphics;
   var text:h2d.Text;

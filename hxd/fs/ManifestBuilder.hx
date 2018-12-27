@@ -10,7 +10,7 @@ class ManifestBuilder
   {
     var data = makeManifest(basePath, options, storeManifest);
     return macro {
-      var loader = new hxd.res.ManifestLoader(@:privateAccess new engine.utils.fs.ManifestFileSystem($v{basePath}, haxe.io.Bytes.ofString($v{data.manifest.toString()})))
+      var loader = new hxd.res.ManifestLoader(@:privateAccess new hxd.fs.ManifestFileSystem($v{basePath}, haxe.io.Bytes.ofString($v{data.manifest.toString()})));
       hxd.Res.loader = loader;
       loader;
     }

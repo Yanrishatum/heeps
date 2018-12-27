@@ -30,6 +30,10 @@ class HeepsMacro
     hxd.res.Config.extensions.set("giff,gif", "hxd.res.GifImage");
     // hxd.res.Config.pairedExtensions.set("giff", "png,gif");
     hxd.res.Config.pairedExtensions.set("gif", "png");
+    
+    // So compiler would resolve this.
+    var c = new hxd.heeps.GifConvert();
+    
     hxd.fs.Convert.converts.push("hxd.heeps.GifConvert");
     if (haxe.macro.Context.definedValue("format-tiled") >= "2.0.0")
     {
