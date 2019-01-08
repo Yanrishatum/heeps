@@ -24,16 +24,16 @@ class AnimationExt extends Animation
     wait = 0;
   }
   
-  public function playAnim(name:String, atFrame:Int = -1):Void
+  public function playAnim(name:String, ?atFrame:Int):Void
   {
-    if (currentAnimation == name && atFrame == -1) return;
+    if (currentAnimation == name && atFrame == null) return;
     var desc = animations.get(name);
     if (desc != null) {
       currentAnimation = name;
       current = desc;
       this.loop = desc.loop;
       if (desc.speed != null) this.speed = desc.speed;
-      play(desc.frames, atFrame);
+      play(desc.frames, atFrame == null ? 0 : atFrame);
       wait = 0;
     }
   }
