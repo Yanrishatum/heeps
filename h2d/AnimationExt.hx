@@ -9,7 +9,7 @@ class AnimationExt extends Animation
   var current:AnimationDescriptor;
   public var currentAnimation(default, null):String;
   
-  var commands:List<AnimationCommand> = new Array();
+  var commands:List<AnimationCommand> = new List();
   
   var wait:Float = 0;
   
@@ -33,7 +33,7 @@ class AnimationExt extends Animation
       current = desc;
       this.loop = desc.loop;
       if (desc.speed != null) this.speed = desc.speed;
-      play(desc.frames, frame);
+      play(desc.frames, atFrame);
       wait = 0;
     }
   }
@@ -82,8 +82,11 @@ class AnimationExt extends Animation
         wait = t;
         return t == 0;
       case SwitchTo(name, frame):
-        var frames = animations.get(name);
-        if (frames != null) play(frames, frame);
+        var desc = animations.get(name);
+        if (desc != null)
+        {
+          playAnim(name, frame);
+        }
         else return true;
       case Jump(frame):
         this.palyAt(frame);
