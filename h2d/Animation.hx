@@ -34,6 +34,16 @@ class AnimationFrame {
 	// TODO: Expand parametrization: dx/dy, colorAdd, colorKey, colorMatrix, blendMode, tileWrap
 
 	/**
+		Specifies event, triggered when this frame is activated.
+	**/
+	public var eventEnter:String;
+	/**
+		Specifies event, triggered when this frame is deactivated.
+		If animation is paused during exit trigger, this frame will remain active.
+	**/
+	public var eventExit:String;
+
+	/**
 		Create a new Animation Frame with specified tile (or null), duration and keyframe flag.
 	**/
 	public function new( tile : Null<h2d.Tile>, duration : Float, isKey = true ) {
@@ -153,6 +163,13 @@ class Animation extends Drawable {
 	}
 
 	/**
+		Triggers when frame contains `event` string
+	**/
+	public dynamic function onEvent(name:String) {
+		
+	}
+
+	/**
 		Returns current AnimationFrame being played.
 	**/
 	public inline function getFrame() : AnimationFrame {
@@ -202,22 +219,37 @@ class Animation extends Drawable {
 
 		var oldFrame : Int = curFrame;
 		var newFrame : Int = oldFrame;
-		var time = elapsedTime + ctx.elapsedTime * speed;
+		var time = elapsedTime += ctx.elapsedTime * speed;
 		var frame = frames[newFrame];
+		
 		while (time > frame.duration) {
 			time -= frame.duration;
 			newFrame++;
+			
+			if (frame.eventExit != null) {
+				onEvent(frame.eventExit);
+				if (elapsedTime == 0) {
+					return;
+				}
+				if (pause) {
+					frame = frames[newFrame];
+					curFrame = newFrame;
+					elapsedTime = time;
+					return;
+				}
+			}
+			
 			if ( newFrame == frames.length ) {
 				if ( loop ) {
 					curFrame = newFrame - 1;
 					elapsedTime = hxd.Math.EPSILON;
-					onAnimEnd();
+					_onAnimEnd();
 					// Callback changed current frame - cancel everything.
 					if (elapsedTime == 0) {
 						return;
 					}
-					// Callback paused playback, use last frame.
-					if ( pause ) {
+					// Callback paused playback, use last frame. Or set loop to false.
+					if ( pause || !loop ) {
 						elapsedTime = 0;
 						return;
 					} else {
@@ -226,21 +258,33 @@ class Animation extends Drawable {
 				} else {
 					curFrame = newFrame - 1;
 					pause = true;
-					onAnimEnd();
+					_onAnimEnd();
 					return;
 				}
 			}
 
 			frame = frames[newFrame];
+			
 			// Prevent skipping over keyframes.
 			if ( frame.isKey && time > frame.duration ) {
 				time = 0;
-				break;
 			}
+			
+			if (frame.eventEnter != null) {
+				onEvent(frame.eventEnter);
+				if (elapsedTime == 0) return;
+				if (pause) break;
+			}
+			
 		}
 
 		curFrame = newFrame;
 		elapsedTime = time;
+	}
+	
+	function _onAnimEnd():Void
+	{
+		onAnimEnd();
 	}
 
 	override function draw( ctx : RenderContext ) {
