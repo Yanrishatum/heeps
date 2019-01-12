@@ -38,6 +38,16 @@ class AnimationExt extends Animation
     }
   }
   
+  public function durationOf(anim:String):Float
+  {
+    var desc = animations.get(anim);
+    if (frames != null)
+    {
+      return Animation.getDuration(desc.frames) * (desc.speed != null ? desc.speed : speed);
+    }
+    return 0;
+  }
+  
   override private function sync(ctx:RenderContext)
   {
     if (wait > 0 && (visible || playWhenHidden)) {

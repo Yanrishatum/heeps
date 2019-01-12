@@ -95,6 +95,13 @@ class Animation extends Drawable {
 		}
 		return result;
 	}
+	
+	public static function getDuration(frames:Array<AnimationFrame>):Float
+	{
+		var result:Float = 0;
+		for (f in frames) result += f.duration;
+		return result;
+	}
 
 	/**
 		The current animation, as a list of AnimationFrame instances to display.
@@ -128,6 +135,11 @@ class Animation extends Drawable {
 	
 	public var width(get, never):Int;
 	public var height(get, never):Int;
+
+	/**
+		Duration of current animation. Affected by `speed` variable, for duration of frame use static `getDuration` function.
+	**/
+	public var duration(get, never):Float;
 
 	/**
 		Create a new animation with the specified frames and parent object
@@ -197,14 +209,18 @@ class Animation extends Drawable {
 	
 	inline function get_width() {
 		var s = 0;
-		for (f in frames) if (f.tile != null) s = hxd.Math.imax(f.tile.width, s);
+		for (f in frames) if (f.tile != null) s = hxd.Math.imax(Std.int(f.tile.width), s);
 		return s;
 	}
 	
 	inline function get_height() {
 		var s = 0;
-		for (f in frames) if (f.tile != null) s = hxd.Math.imax(f.tile.height, s);
+		for (f in frames) if (f.tile != null) s = hxd.Math.imax(Std.int(f.tile.height), s);
 		return s;
+	}
+
+	inline function get_duration():Float {
+		return getDuration(frames) * speed;
 	}
 
 	override function getBoundsRec( relativeTo : Object, out : h2d.col.Bounds, forSize : Bool ) {

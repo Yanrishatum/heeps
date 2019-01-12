@@ -1,5 +1,6 @@
 package h2d.ui;
 
+import h2d.col.Point;
 import h2d.col.Bounds;
 
 /**
@@ -18,14 +19,14 @@ class ScrollArea extends Mask
   
   public var scrollStep:Int;
   
-  public function new(width:Int, height:Int, scrollStep:Int = 16, bounds:Bounds, ?parent:Object)
+  public function new(width:Int, height:Int, scrollStep:Int = 16, ?bounds:Bounds, ?parent:Object)
   {
     super(width, height, parent);
     this.scrollStep = scrollStep;
     this.scrollBounds = bounds;
   }
   
-  function set_scrollY(v:Float):Float
+  function set_scrollX(v:Float):Float
   {
     if (scrollBounds != null) v = hxd.Math.clamp(v, scrollBounds.xMin, scrollBounds.xMax);
     posChanged = true;
@@ -51,6 +52,13 @@ class ScrollArea extends Mask
     absX -= scrollX;
     absY -= scrollY;
   }
+	
+	override public function globalToLocal(pt:Point):Point
+	{
+		return super.globalToLocal(pt);
+		pt.x += scrollX;
+		pt.y += scrollY;
+	}
   
 	override function drawRec( ctx : h2d.RenderContext ) @:privateAccess {
 		if( !visible ) return;
