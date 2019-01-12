@@ -15,6 +15,7 @@ class SimpleButton extends Interactive
   var disabled:Object;
   
   private var pressed:Bool;
+  private var over:Bool;
   public var enabled(default, set):Bool = true;
   
   public function new(w:Int, h:Int, idle:Object, hover:Object, press:Object, ?disabled:Object, ?parent:Object)
@@ -49,7 +50,8 @@ class SimpleButton extends Interactive
   {
     if (enabled)
     {
-      if (isOver())
+      disabled.visible = false;
+      if (over)
       {
         idle.visible = false;
         press.visible = pressed;
@@ -57,7 +59,7 @@ class SimpleButton extends Interactive
       }
       else 
       {
-        idle.visible = true;
+        idle.visible = !pressed;
         press.visible = false;
         hover.visible = pressed;
       }
@@ -78,9 +80,15 @@ class SimpleButton extends Interactive
       e.cancel = true;
       return;
     }
+    super.handleEvent(e);
+    if (!e.cancel)
     switch(e.kind)
     {
-      case EventKind.EOver, EventKind.EOut:
+      case EventKind.EOver:
+        over = true;
+        updateState();
+      case EventKind.EOut:
+        over = false;
         updateState();
       case EPush:
         pressed = true;
@@ -90,6 +98,5 @@ class SimpleButton extends Interactive
         updateState();
       default:
     }
-    super.handleEvent(e);
   }
 }
