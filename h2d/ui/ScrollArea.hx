@@ -28,14 +28,14 @@ class ScrollArea extends Mask
   
   function set_scrollX(v:Float):Float
   {
-    if (scrollBounds != null) v = hxd.Math.clamp(v, scrollBounds.xMin, scrollBounds.xMax);
+    if (scrollBounds != null) v = hxd.Math.clamp(v, scrollBounds.xMin, scrollBounds.xMax - width);
     posChanged = true;
     return scrollX = v;
   }
   
   function set_scrollY(v:Float):Float
   {
-    if (scrollBounds != null) v = hxd.Math.clamp(v, scrollBounds.yMin, scrollBounds.yMax);
+    if (scrollBounds != null) v = hxd.Math.clamp(v, scrollBounds.yMin, scrollBounds.yMax - height);
     posChanged = true;
     return scrollY = v;
   }
