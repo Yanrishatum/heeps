@@ -17,7 +17,7 @@ class ScrollText extends Mask
   public var scrollV(default, set):Int = 0;
   public var bottomScrollV(get, never):Int;
   
-  public var scrollStep:Int;
+  public var scrollStep:Float;
   
   public function new(text:Text, width:Int, height:Int, ?parent:Object)
   {
