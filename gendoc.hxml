@@ -1,0 +1,17 @@
+-lib heaps
+-cp .
+samples/DocMacro.hx
+--macro hxd.heeps.HeepsMacro.init()
+--macro samples.DocMacro.include('h3d')
+--macro samples.DocMacro.include('h2d')
+--macro samples.DocMacro.include('hxd')
+--macro samples.DocMacro.store()
+-D doc-gen
+-xml docs/doc.xml
+--next
+samples/DocMacro.hx
+-main samples.DocMacro
+--interp
+# -hl gendoc.hl
+# --cmd hl gendoc.hl
+# -cmd haxelib run dox -i docs -o docs
