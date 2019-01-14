@@ -4,16 +4,40 @@ package h2d;
   Extended ScaleGrid: Allows for tiling of center and borders have individual sizes.
 **/
 class ScaleGridExt extends h2d.TileGroup {
-
+	
+	/**
+		Height of the top border.
+	**/
   public var borderTop(default, set):Int;
+	/**
+		Height of the bottom border.
+	**/
   public var borderBottom(default, set):Int;
+	/**
+		Width of the left border.
+	**/
   public var borderLeft(default, set):Int;
+	/**
+		Height of the right border.
+	**/
   public var borderRight(default, set):Int;
 
+	/**
+		Width of the ScaleGrid.
+	**/
 	public var width(default,set) : Int;
+	/**
+		Height of the ScaleGrid.
+	**/
 	public var height(default,set) : Int;
 
+	/**
+		If true, borders will be tiled instead of stretched.
+	**/
 	public var tileBorders(default, set) : Bool;
+	/**
+		If true, central part will be tiled instead of stretched.
+	**/
   public var tileCenter(default, set) : Bool;
 
 	public function new( tile, borderT, borderB, borderL, borderR, ?parent ) {
@@ -128,14 +152,14 @@ class ScaleGridExt extends h2d.TileGroup {
 			var t = tile.sub(bl, tile.height - bb, sizeX, bb);
 			t.scaleToSize(w, bb);
 			content.addColor(bl, h + bt, curColor, t);
-// TODO:
-			// var t = tile.sub(0, bh, bw, sizeY);
-			// t.scaleToSize(bw, h);
-			// content.addColor(0, bh, curColor, t);
+			
+			var t = tile.sub(0, bt, bl, sizeY);
+			t.scaleToSize(bl, h);
+			content.addColor(0, bt, curColor, t);
 
-			// var t = tile.sub(tile.width - bw, bh, bw, sizeY);
-			// t.scaleToSize(bw, h);
-			// content.addColor(w + bw, bh, curColor, t);
+			var t = tile.sub(tile.width - br, bt, br, sizeY);
+			t.scaleToSize(br, h);
+			content.addColor(w + bl, bt, curColor, t);
 
 		} else {
       calcTiling();

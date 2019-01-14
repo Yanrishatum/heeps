@@ -4,6 +4,10 @@ import h2d.Tile;
 import h2d.Text;
 import hxd.Event;
 
+/**
+  Primitive Button with label.
+  Can be used for fast UI creation for debugging purposes.
+**/
 class Button extends Interactive
 {
   private var bg:Tile;

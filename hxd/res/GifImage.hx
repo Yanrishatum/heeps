@@ -5,13 +5,22 @@ import haxe.io.Path;
 import h2d.Animation;
 import hxd.res.Resource;
 
+/**
+  A .gif image resource.
+**/
 class GifImage extends Resource {
   
+  /**
+    Returns Image resource of gif spritesheet.
+  **/
   public function toImage():Image
   {
     return hxd.res.Loader.currentInstance.load(Path.withExtension(entry.path, "png")).toImage();
   }
   
+  /**
+    Returns list of animation frames containing full gif animation.
+  **/
   public function toFrames():Array<AnimationFrame>
   {
     var rd = new haxe.io.BytesInput(entry.getBytes());
@@ -31,6 +40,9 @@ class GifImage extends Resource {
     return list;
   }
   
+  /**
+    Returns an Animation object with frames contained in gif file.
+  **/
   public inline function toAnimation(?parent:Object):Animation
   {
     return new Animation(toFrames(), parent);

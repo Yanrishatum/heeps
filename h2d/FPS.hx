@@ -2,7 +2,10 @@ package h2d;
 
 import hxd.Timer;
 
-// Adapted from openfl.display.FPS
+/**
+  Primitive FPS counter.
+  Adapted from openfl.display.FPS
+**/
 class FPS extends Object
 {
   

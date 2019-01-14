@@ -3,11 +3,18 @@ package h2d.ui;
 import hxd.Event;
 import h2d.Tile;
 
+/**
+  Primitive checkbox.
+  Can be used for fast UI creation for debugging purposes.
+**/
 class Checkbox extends Interactive
 {
   private static var bg:Tile;
   private static var check:Tile;
   
+  /**
+    Current checkbox state. Does not trigger `onChange` when changed, use `setChecked` function instead if even is required.
+  **/
   public var checked:Bool;
   
   public function new(?parent:Object)
@@ -34,6 +41,9 @@ class Checkbox extends Interactive
     }
   }
   
+  /**
+    Sets `checked` flag and triggers `onChange` if value changes.
+  **/
   public function setChecked(v:Bool):Void
   {
     if (checked != v)

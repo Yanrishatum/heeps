@@ -2,9 +2,11 @@ package h2d.ui;
 
 import hxd.Event;
 import h2d.Object;
+import h2d.col.Collider;
 
 /**
-  A button design based on openfl.display.SimpleButton
+  A simple button with simple premade 4 states.
+  Based on openfl.display.SimpleButton design.
 **/
 class SimpleButton extends Interactive
 {
@@ -16,12 +18,15 @@ class SimpleButton extends Interactive
   
   private var pressed:Bool;
   private var over:Bool;
+  /**
+    Button availability state. If `false`, does not Interact with mouse and showns `disabled` state.
+  **/
   public var enabled(default, set):Bool = true;
   
-  public function new(w:Int, h:Int, idle:Object, hover:Object, press:Object, ?disabled:Object, ?parent:Object)
+  public function new(w:Int, h:Int, idle:Object, hover:Object, press:Object, ?disabled:Object, ?parent:Object, ?shape:Collider)
   {
     // TODO: Disabled
-    super(w, h, parent);
+    super(w, h, parent, shape);
     this.idle = idle;
     addChild(idle);
     this.hover = hover;

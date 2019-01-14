@@ -96,6 +96,9 @@ class Animation extends Drawable {
 		return result;
 	}
 	
+	/**
+		Returns total duration of animation frames.
+	**/
 	public static function getDuration(frames:Array<AnimationFrame>):Float
 	{
 		var result:Float = 0;
@@ -131,10 +134,21 @@ class Animation extends Drawable {
 	var curFrame : Int;
 	var elapsedTime : Float;
 	
+	/**
+		Enables playback of animation even when `visible = false`. (default: false)
+		Does not check for nested visibility.
+	**/
 	public var playWhenHidden:Bool = false;
 	
+	/**
+		Total width of the animation. Accounts for all frames.
+	**/
 	public var width(get, never):Int;
+	/**
+		Total height of the animation. Accounts for all frames.
+	**/
 	public var height(get, never):Int;
+	// TODO: Top, left, right, bottom.
 
 	/**
 		Duration of current animation. Affected by `speed` variable, for duration of frame use static `getDuration` function.
@@ -160,6 +174,9 @@ class Animation extends Drawable {
 		pause = false;
 	}
 	
+	/**
+		Starts animation playback at specified frame.
+	**/
 	public function palyAt(frame:Int = 0) {
 		pause = false;
 		currentFrame = frame;

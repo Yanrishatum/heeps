@@ -4,15 +4,30 @@ import h3d.mat.Material;
 import h2d.Tile;
 import h3d.prim.PlanePrim;
 
+/**
+  A classic 2D sprite that can follow camera orientation to always face it.
+  Sprite front is X forward.
+**/
 @:access(h2d.Tile)
 class TileSprite extends Mesh
 {
-  
+  /**
+    If true, will follow camera orientation to always appear facing X coordinate at camera. (default: true)
+  **/
   public var faceCamera:Bool;
-  // When false - will track camera on X and Y axes, but will always look at Z=0
+  /**
+    If true, will track camera on Z axis, otherwise only X and Y coordinates will be adjusted, and sprite will look forward at all times. (default: true)
+  **/
   public var faceZAxis:Bool;
+  // TODO: zAxis rotation.
+  /**
+    Currently displayed `h2d.Tile`.
+  **/
   public var tile(default, set):Tile;
   var ppu:Float;
+  /**
+    Pixels per unit value. Affects the sprite size in 3D space. (default: 1)
+  **/
   public var pixelsPerUnit(default, set):Float;
   var plane:PlanePrim;
   
@@ -58,12 +73,13 @@ class TileSprite extends Mesh
       var up = ctx.scene.camera.up;
       var vec = ctx.scene.camera.pos.sub(ctx.scene.camera.target);
       if (!faceZAxis) vec.z = 0;
-      // // var oldX = qRot.x;
-      // // var oldY = qRot.y;
-      // // var oldZ = qRot.z;
-      // // var oldW = qRot.w;
+      var oldX = qRot.x;
+      var oldY = qRot.y;
+      var oldZ = qRot.z;
+      var oldW = qRot.w;
       qRot.initRotateMatrix(Matrix.lookAtX(vec, up));
-      this.posChanged = true;
+      if (oldX != qRot.x || oldY != qRot.y || oldZ != qRot.z || oldW != qRot.w)
+        this.posChanged = true;
     }
     super.syncRec(ctx);
   }

@@ -3,12 +3,22 @@ package h2d.ui;
 import hxd.Event;
 import h2d.Tile;
 
+/**
+  Primitive radio button.
+  Can be used for fast UI creation for debugging purposes.
+**/
 class RadioButton extends Checkbox
 {
   private static var bg:Tile;
   private static var check:Tile;
   
+  /**
+    Group this Radiobutton belongs to.
+  **/
   public var group(default, null):RadioGroup;
+  /**
+    Index of this checkbox in the group.
+  **/
   public var index(default, null):Int;
   
   public function new(?parent:Object, ?group:RadioGroup)
@@ -55,18 +65,29 @@ class RadioButton extends Checkbox
     if (checked) emitTile(ctx, check);
   }
   
+  /**
+    Triggers when RadioGroup changes selected button.
+    Happens on all buttons.
+  **/
   public dynamic function onRadio(value:Int):Void
   {
     
   }
 }
 
+/**
+  A group of RadioButtons for, duh, grouping of RadioButtons.
+**/
 @:access(h2d.ui.RadioButton)
 class RadioGroup
 {
   
   var buttons:Array<RadioButton>;
   
+  /**
+    Currently selected index.
+    Always triggers onChange and onRadio in buttons when changed.
+  **/
   public var selectedIndex(get, set):Int;
   
   public function new(?buttons:Array<RadioButton>)
@@ -106,6 +127,9 @@ class RadioGroup
     return v;
   }
   
+  /**
+    Adds new RadioButton to the group.
+  **/
   public function add(radio:RadioButton)
   {
     if (radio.group != null) radio.group.remove(radio);
@@ -114,6 +138,9 @@ class RadioGroup
     buttons.push(radio);
   }
   
+  /**
+    Removes RadioButton from the group.
+  **/
   public function remove(radio:RadioButton)
   {
     if (buttons.remove(radio))
@@ -124,6 +151,9 @@ class RadioGroup
     }
   }
   
+  /**
+    Triggers when selected index changes.
+  **/
   public dynamic function onChange(index:Int):Void
   {
     

@@ -6,16 +6,33 @@ import h2d.Object;
 
 /**
   Vertically scrollable text container.
+  Useful for creation of walls of text.
 **/
 class ScrollText extends Mask
 {
-  
+  /**
+    Reference to Text instance.
+  **/
   public var text:Text;
+  /**
+    Reference to HtmlText instance if passed one at creation.
+  **/
   public var htmlText:HtmlText;
   
+  /**
+    Maxiumm possible `scrollV` value.
+  **/
   public var maxScrollV(get, never):Int;
-  public var scrollV(default, set):Int = 0;
-  public var bottomScrollV(get, never):Int;
+  /**
+    Current scrollV value. Starts at 0, up to maxScrollV.
+  **/
+  public var scrollV(default, set):Float = 0;
+  /**
+    Bottom of current scrollV value. Represents bottom of visible Text area.
+  **/
+  public var bottomScrollV(get, never):Float;
+  
+  // TODO: ScrollH
   
   public var scrollStep:Float;
   
@@ -41,7 +58,7 @@ class ScrollText extends Mask
     return v;
   }
   
-  function get_bottomScrollV():Int
+  function get_bottomScrollV():Float
   {
     if (text.textHeight < height) return Math.ceil(text.textHeight / scrollStep);
     var bottom:Float = text.y + text.textHeight;
@@ -49,7 +66,7 @@ class ScrollText extends Mask
     return scrollV + Math.ceil(bottom / scrollStep);
   }
   
-  function set_scrollV(v:Int):Int
+  function set_scrollV(v:Float):Float
   {
     if (v < 0) v = 0;
     else if (v > maxScrollV) v = maxScrollV;
