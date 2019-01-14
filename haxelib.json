@@ -3,7 +3,7 @@
   "license": "MIT",
   "tags": ["heaps"],
   "releasenote": "Added Axes and TileSprite classes",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "url": "http://github.com/yanrishatum/heeps",
   "dependencies": { "heaps": "" },
   "description": "A Heaps extension library with \"advanced\" features.",

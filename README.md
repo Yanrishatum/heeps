@@ -7,6 +7,7 @@ An "advanced" Heaps extension library.
 * I do not blame or have a grudge against Heaps developers, it's their engine which they develop for their needs that arise internally. And they want it to be as simple and dumb as possible, avoiding anything too advanced. It's their right and their vision.
 * My vision is to have a **good and hopefully robust engine** that you can use and have many features out of the box. This is the purpose of this library. 
 * Everyone free to PR features they want, I'm not picky.
+* I also take feature requests, but don't expect me to jump right onto it. ;)
 * **Flash is in the past**. I do not plan to support flash target. If it works - it's a miracle.
 * Code style is all over the place, I'll fix it eventually.
 * No, seriously, if something from Heeps going to be merged into stock Heaps - it's cool. I just not going to do PRs with such features just to argue with devs about if that's really needed, will it add unnecessary complexity, etc. I'm doing this in my free time and for fun, and arguing kills the mood for me.
@@ -16,18 +17,14 @@ An "advanced" Heaps extension library.
 * `hxd.heaps` package user for internal Heaps features, like macro functions.
 
 ## Features
-### `h2d`
-* `Animation` - An actually good animation compared to stock `h2d.Anim`. Allows per-frame delay configuration and some other features.
-* `FPS` - Based on OpenFL fps counter. Shows FPS (duh).
-* `Tilemap` - Basic Tilemap renderer. NOT PERFECT. It does not care about render-order and shit.
-* `ui.*` - Small set of elements akin to Slider for debugging purposes. (Button with text, Checkbox, RadioButton)
-### `h3d`
-* `scene.S2DPlane` - A 2D plane that renders s2d objects on it.
-* `scene.Axes` - primitive (taken from Heaps samples) axis display.
-* `scene.TileSprite` - simple `h2d.Tile` renderer with pixels-per-unit scaling and capability to always face camera.
-### `hxd`
-* `res.GifImage` - Animated gif support with Res. Use `toAnimation` and `toFrames` to get animation data. `toImage` can be used to obtain spritesheet Image.
-* `res.TmxMap` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
+
+For a list of additional classes see `docs`. Listing every single class here is just not feasible at this point.  
+Below are specific remarks for some of the features or objects that I still have to document properly.
+
+* `h2d.Tilemap` - Basic Tilemap renderer. NOT PERFECT. It does not care about render-order and shit. I'll fix and improve it eventually, but not now.
+* `h3d.scene.S2DPlane` - A 2D plane that renders s2d objects on it. Uses texture rendering. For more primitive approach see `h3d.scene.TileSprite`.
+* `hxd.res.GifImage` - Animated gif support with Res. Use `toAnimation` and `toFrames` to get animation data. `toImage` can be used to obtain spritesheet Image.
+* `hxd.res.TmxMap` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
 * `ManifestFileSystem` - js-oriented alternative to stupid embedding into .js file. More tricky to operate, and requires preloading. See below.
 
 ### Manifest FS
