@@ -1,4 +1,5 @@
 package h2d.ui;
+import hxd.Event;
 import h2d.Mask;
 import h2d.Text;
 import h2d.HtmlText;
@@ -35,6 +36,11 @@ class ScrollText extends Mask
   // TODO: ScrollH
   
   public var scrollStep:Float;
+  
+  var inter:Interactive;
+  var dragX:Float;
+  var dragY:Float;
+  var refV:Float;
   
   public function new(text:Text, width:Int, height:Int, ?parent:Object)
   {
@@ -74,6 +80,66 @@ class ScrollText extends Mask
     return scrollV = v;
   }
   
+  override private function sync(ctx:RenderContext)
+  {
+    super.sync(ctx);
+    if (inter != null)
+    {
+      inter.width = this.width;
+      inter.height = this.height;
+    }
+  }
+  
+  public function hookListeners(mouseDrag:Bool = true):Void
+  {
+    if (inter == null)
+    {
+      inter = new Interactive(this.width, this.height, this);
+      inter.onWheel = onWheel;
+      inter.cursor = Default;
+      if (mouseDrag)
+      {
+        inter.onPush = startMouseDrag;
+        inter.onRelease = stopMouseDrag;
+      }
+    }
+  }
+  
+  public function unhookListeners():Void
+  {
+    if (inter != null)
+    {
+      inter.remove();
+      inter.onWheel = null;
+      inter.onPush = null;
+      inter.onRelease = null;
+      inter = null;
+    }
+  }
+  
+  function startMouseDrag(e:Event):Void
+  {
+    dragX = e.relX + absX;
+    dragY = e.relY + absY;
+    refV = scrollV;
+    getScene().startDrag(mouseDrag, null, e);
+  }
+  
+  function stopMouseDrag(e:Event):Void
+  {
+    getScene().stopDrag();
+  }
+  
+  function mouseDrag(e:Event):Void
+  {
+    var diffY = e.relY - dragY;
+    scrollV = refV - (diffY / scrollStep);
+  }
+  
+  function onWheel(e:Event):Void
+  {
+    scrollV += e.wheelDelta;
+  }
   
   
 }

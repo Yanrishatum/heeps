@@ -15,6 +15,7 @@ An "advanced" Heaps extension library.
 ## Structure
 * `h2d`, `h3d` and `hxd` packages used in the same way as Heaps do - 2D, 3D and general stuff.
 * `hxd.heaps` package user for internal Heaps features, like macro functions.
+* `hxd.tools` designated for `using hxd.tools.NTools;` that would extend standard functionality of existing Heaps objects.
 
 ## Features
 
