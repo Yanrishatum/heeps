@@ -28,11 +28,19 @@ Below are specific remarks for some of the features or objects that I still have
 * `hxd.res.TmxMap` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
 * `ManifestFileSystem` - js-oriented alternative to stupid embedding into .js file. More tricky to operate, and requires preloading. See below.
 
+### Type Patching
+Library also uses ~~black magic~~ macros to patch some base classes.  
+Can be disabled by `-D heeps_disable_patch_<path>`. E.g. `-D heaps_disable_patch_h2d_object` for `h2d.Object` patch. Note that some patches may rely on others. Alternatively `-D heeps_disable_patch` will disable all type patching.
+* `h2d.Object` - Added `originX` and `originY` that control origin offset for transofmrations. `transform` and `absoluteTransform` for overriding transform matrix with custom one.
+* `h2d.Layers` - Added `moveChild`, `addAt` and `getChildLayerIndex` for more control over children positioning.
+
 ### Manifest FS
 Since we are sane people and don't want 50+MB js file that contains Base64-encoded game assets, we obviously want to load those files separately. Manifest-FS provides ability to load those files from a manifest file.  
 This approach requires some prep-work to get it running, but beats embedding everything in JS.  
 First, you have to generate manifest file with `hxd.fs.ManifestBuilder.create`, `generate` and `initManifest`. Last acts exactly the same as `Res.init*` functions and bakes manifest into the code. First just generates manifest FS in macro call and second one just does convert and optionally saves manifest to your res folder. I trust people here are smart enough to figure out how to utilize those two, so I'll focus on one I use, e.g. `initManifest` method.
 > I should note that all docs about resource management make you believe that you have to initialize them in `main`. THIS. IS. WRONG. Instead, you need to initialize them by overriding `hxd.App.loadAssets` and call `onLoaded` after everything's loaded. We're good? Good.
+
+> Todo: Fix an example, because it doesn't work.
 
 `initManifest` does not create typical `Loader` instance. Instead, it creates `hxd.res.ManifestLoader`, which you then should populate with progress handlers and call `loadManifestFiles`. Here's an example code of how you do this:
 ```haxe

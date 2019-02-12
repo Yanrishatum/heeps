@@ -4,7 +4,6 @@
 -cp .
 # -D analyzer-optimize
 -D resourcesPath=samples/res
-# --macro keep("")
-# --macro include("")
+extraParams.hxml
 -main Main
 -hl game.hl
