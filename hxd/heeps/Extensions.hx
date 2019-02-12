@@ -14,7 +14,7 @@ class Extensions
       var name = "patch_" + pack.split(".").join("_");
       if (!haxe.macro.Context.defined("heeps_disable_" + name.toLowerCase()))
       {
-        haxe.macro.Compiler.addMetadata("@:build(hxd.heeps.Extension." + name + "())", pack);
+        haxe.macro.Compiler.addMetadata("@:build(hxd.heeps.Extensions." + name + "())", pack);
         return true;
       }
       return false;
