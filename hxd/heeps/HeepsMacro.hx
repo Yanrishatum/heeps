@@ -37,7 +37,7 @@ class HeepsMacro
     hxd.fs.Convert.converts.push("hxd.heeps.GifConvert");
     if (haxe.macro.Context.definedValue("format-tiled") >= "2.0.0")
     {
-      hxd.res.Config.extensions.set("tmx", "hxd.res.TmxMap");
+      hxd.res.Config.extensions.set("tmx", "hxd.res.TiledMapFile");
     }
   }
   
