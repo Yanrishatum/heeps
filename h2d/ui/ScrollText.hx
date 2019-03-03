@@ -25,7 +25,8 @@ class ScrollText extends Mask
   **/
   public var maxScrollV(get, never):Int;
   /**
-    Current scrollV value. Starts at 0, up to maxScrollV.
+    Current scrollV value. Starts at 0, up to maxScrollV.  
+    Note: Does not invoke onScrollV.
   **/
   public var scrollV(default, set):Float = 0;
   /**
@@ -35,6 +36,9 @@ class ScrollText extends Mask
   
   // TODO: ScrollH
   
+  /**
+    Amount of pixels one scroll step uses. Defaults to Text font line height + lineSpacing.
+  **/
   public var scrollStep:Float;
   
   var inter:Interactive;
@@ -48,7 +52,6 @@ class ScrollText extends Mask
     this.htmlText = Std.instance(text, HtmlText);
     super(width, height, parent);
     scrollStep = text.font.lineHeight + text.lineSpacing;
-    this.text = text;
     addChild(text);
   }
   
@@ -133,12 +136,43 @@ class ScrollText extends Mask
   function mouseDrag(e:Event):Void
   {
     var diffY = e.relY - dragY;
-    scrollV = refV - (diffY / scrollStep);
+    scrollTo(refV - (diffY / scrollStep));
   }
   
   function onWheel(e:Event):Void
   {
-    scrollV += e.wheelDelta;
+    scrollBy(e.wheelDelta);
+  }
+  
+  /**
+    Shifts current `scrollV` by `steps` and invokes `onScrollV`.
+  **/
+  public inline function scrollBy(steps:Float):Void
+  {
+    scrollTo(scrollV + steps);
+  }
+  
+  /**
+    Sets `scrollV` and invokes `onScrollV`.
+  **/
+  public function scrollTo(v:Float):Void
+  {
+    var old = scrollV;
+    onScrollV(scrollV = v, old);
+  }
+  
+  /**
+    Converts provided position in pixels to scroll stepped value.  
+    Shortcut to `pixels / scrollStep`
+  **/
+  public inline function toScrollV(pixels:Float):Float
+  {
+    return pixels / scrollStep;
+  }
+  
+  public dynamic function onScrollV(v:Float, oldV:Float):Void
+  {
+    
   }
   
   

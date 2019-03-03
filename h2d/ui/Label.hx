@@ -9,7 +9,7 @@ class Label extends Interactive
   public var target:Interactive;
   public var text:Text;
   
-  public function new(label:String, ?font:Font, ?align:Align, ?maxW:Int, target:Interactive, ?parent:Object)
+  public function new(label:String, ?font:Font, ?align:Align, ?maxW:Float, target:Interactive, ?parent:Object)
   {
     if (font == null) font = hxd.res.DefaultFont.get();
     if (align == null) align = Left;
