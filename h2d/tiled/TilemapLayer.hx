@@ -23,6 +23,7 @@ class TilemapLayer extends SpriteBatchExt
     {
       // TODO: Proper offsets
       // TODO: Render-order
+      // TODO: Anything but ortho
       var t = map.getTile(tile.gid);
       if (t != null)
       {

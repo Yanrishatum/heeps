@@ -25,7 +25,7 @@ Below are specific remarks for some of the features or objects that I still have
 * `h2d.Tilemap` - Basic Tilemap renderer. NOT PERFECT. It does not care about render-order and shit. I'll fix and improve it eventually, but not now.
 * `h3d.scene.S2DPlane` - A 2D plane that renders s2d objects on it. Uses texture rendering. For more primitive approach see `h3d.scene.TileSprite`.
 * `hxd.res.GifImage` - Animated gif support with Res. Use `toAnimation` and `toFrames` to get animation data. `toImage` can be used to obtain spritesheet Image.
-* `hxd.res.TmxMap` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
+* `hxd.res.TiledMapFile` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
 * `ManifestFileSystem` - js-oriented alternative to stupid embedding into .js file. More tricky to operate, and requires preloading. See below.
 
 ### Type Patching
@@ -33,6 +33,15 @@ Library also uses ~~black magic~~ macros to patch some base classes.
 Can be disabled by `-D heeps_disable_patch_<path>`. E.g. `-D heaps_disable_patch_h2d_object` for `h2d.Object` patch. Note that some patches may rely on others. Alternatively `-D heeps_disable_patch` will disable all type patching.
 * `h2d.Object` - Added `originX` and `originY` that control origin offset for transofmrations. `transform` and `absoluteTransform` for overriding transform matrix with custom one.
 * `h2d.Layers` - Added `moveChild`, `addAt` and `getChildLayerIndex` for more control over children positioning.
+
+### Tiled support
+
+Library provides rudimentary Tiled map editor integration. It's integration far from complete, and may be improved.  
+Tiled .tmx maps can be accessed via `hxd.Res` and parsed with `toMap()` function. Heeps will try to resolve all dependencies automatically, however it can be done manually afterwards.  
+Returned object will contain parsed `format.tmx.TiledMap` and a list of loaded tilesets that can be used to get `h2d.Tile` instances with ease.
+
+In future `h2d.tiled` will contain helper classes that would provide ability to visualise Tiled maps.
+Currently there is only a draft version of layer renderer for Tiled utilizing `h2d.SpriteBatchExt`. But it is limited to 8 unique textures per layer as well as not supports render-order (uses default right-bottom) and orientation other than orthogonal.
 
 ### Manifest FS
 Since we are sane people and don't want 50+MB js file that contains Base64-encoded game assets, we obviously want to load those files separately. Manifest-FS provides ability to load those files from a manifest file.  
