@@ -38,12 +38,10 @@ class TiledMapData {
     {
       if (tilesets[i+1].tileset.firstGID > gid)
       {
-        trace(tilesets[i].tileset.firstGID, gid, i);
         return tilesets[i].tileByGid(gid);
       }
       i++;
     }
-    trace(tilesets[tilesets.length - 1].tileset.firstGID, gid, i);
     return tilesets[l].tileByGid(gid);
   }
 }

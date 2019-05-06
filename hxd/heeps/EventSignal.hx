@@ -85,6 +85,11 @@ class EventSignal<T:haxe.Constraints.Function>
     return false;
   }
   
+  public function removeAll()
+  {
+    listeners = new Array();
+  }
+  
   function listenerSort(a:SignalListener<T>, b:SignalListener<T>):Int
   {
     if (a.priority < b.priority) return 1;

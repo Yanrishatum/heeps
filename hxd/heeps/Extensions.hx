@@ -9,19 +9,25 @@ class Extensions
   public static function init():Void
   {
     if (haxe.macro.Context.defined("heeps_disable_patch")) return;
-    inline function patch(pack:String):Bool
+    
+    inline function patch(pack:String, ?extra:Array<String>):Bool
     {
       var name = "patch_" + pack.split(".").join("_");
       if (!haxe.macro.Context.defined("heeps_disable_" + name.toLowerCase()))
       {
         haxe.macro.Compiler.addMetadata("@:build(hxd.heeps.Extensions." + name + "())", pack);
+        if (extra != null) for (s in extra)
+        {
+          name = "patch_" + s.split(".").join("_");
+          haxe.macro.Compiler.addMetadata("@:build(hxd.heeps.Extensions." + name + "())", s);
+        }
         return true;
       }
       return false;
     }
     
     patch("h2d.Object");
-    patch("h2d.Layers");
+    // patch("h2d.Layers"); // TODO: Fix
   }
   #end
   
@@ -63,7 +69,7 @@ class Extensions
       inline function set_originY(v:Float):Float
       {
         this.posChanged = true;
-        return this.originX = v;
+        return this.originY = v;
       }
       
       // function set_skewX(v:Float):Float

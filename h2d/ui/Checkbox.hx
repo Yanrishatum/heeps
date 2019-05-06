@@ -16,10 +16,10 @@ class Checkbox extends Interactive
     Current checkbox state. Does not trigger `onChange` when changed, use `setChecked` function instead if even is required.
   **/
   public var checked:Bool;
+  public var label:Text;
   
-  public function new(?parent:Object)
+  public function new(?parent:Object, ?_label:String)
   {
-    // TODO: Labelled checkbox
     super(10, 10, parent);
     if (bg == null)
     {
@@ -38,6 +38,13 @@ class Checkbox extends Interactive
       check = Tile.fromBitmap(d);
       check.dx = 1;
       check.dy = 1;
+    }
+    if (_label != null)
+    {
+      label = new Text(hxd.res.DefaultFont.get(), this);
+      label.text = _label;
+      label.x = 11;
+      this.width = 11 + label.textWidth;
     }
   }
   

@@ -9,6 +9,7 @@ class ManifestBuilder
   public static macro function initManifest( ?basePath : String, ?options : hxd.res.EmbedOptions, ?storeManifest:String )
   {
     var data = makeManifest(basePath, options, storeManifest);
+    if (basePath == null) basePath = "res";
     return macro {
       var loader = new hxd.res.ManifestLoader(@:privateAccess new hxd.fs.ManifestFileSystem($v{basePath}, haxe.io.Bytes.ofString($v{data.manifest.toString()})));
       hxd.Res.loader = loader;

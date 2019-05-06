@@ -16,7 +16,7 @@ class Button extends Interactive
   
   private var pressed:Bool;
   
-  public function new(w:Int, h:Int, label:String, ?parent:Object)
+  public function new(w:Int = -1, h:Int = -1, label:String, ?parent:Object)
   {
     super(w, h, parent);
     var txt:Text = new Text(hxd.res.DefaultFont.get(), this);
@@ -26,6 +26,8 @@ class Button extends Interactive
     txt.x = 0;
     txt.y = (h - txt.textHeight) / 2;
     txt.color.setColor(0xffffffff);
+    if (w == -1) width = w = Math.ceil(txt.textWidth) + 4;
+    if (h == -1) height = h = Math.ceil(txt.textHeight) + 4;
     
     bg = Tile.fromColor(0x808080, w, h);
     hover = Tile.fromColor(0xA0A0A0, w, h);

@@ -10,6 +10,7 @@ import h2d.SpriteBatch;
 **/
 class SpriteBatchExt extends SpriteBatch
 {
+  @:allow(h2d.TileGroupExt)
   static var noTexture:Texture;
   var textureShader:h3d.shader.MultiTexture;
   var textureIndex:Array<TextureRef>;
@@ -52,12 +53,11 @@ class SpriteBatchExt extends SpriteBatch
           case 6: this.textureShader.texture6 = ref.texture;
           case 7: this.textureShader.texture7 = ref.texture;
         }
-        trace(i, 'new');
         break;
       }
       else if (ref.texture == e.t.getTexture())
       {
-        ref.refCount++; trace(i, 'ref+');
+        ref.refCount++;
         break;
       }
       i++;

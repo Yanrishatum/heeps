@@ -19,7 +19,7 @@ class MultiTexture extends Shader
     var calculatedUV:Vec2;
     var textureColor:Vec4;
     
-    @var var texIndex:Int;
+    @var var texIndex:Float;
     // @param var texture:Sampler2D;
     @param var texture1:Sampler2D;
     @param var texture2:Sampler2D;
@@ -31,19 +31,20 @@ class MultiTexture extends Shader
     
     function __init__()
     {
-      texIndex = int(idxIn.textureIndex);
+      texIndex = idxIn.textureIndex;
     }
     
     function fragment()
     {
       var t0 = textureColor; // workaround
-      if (texIndex == 1) textureColor = texture1.get(calculatedUV);
-      else if (texIndex == 2) textureColor = texture2.get(calculatedUV);
-      else if (texIndex == 3) textureColor = texture3.get(calculatedUV);
-      else if (texIndex == 4) textureColor = texture4.get(calculatedUV);
-      else if (texIndex == 5) textureColor = texture5.get(calculatedUV);
-      else if (texIndex == 6) textureColor = texture6.get(calculatedUV);
-      else if (texIndex == 7) textureColor = texture7.get(calculatedUV);
+      var index = int(texIndex);
+      if (index == 1) textureColor = texture1.get(calculatedUV);
+      else if (index == 2) textureColor = texture2.get(calculatedUV);
+      else if (index == 3) textureColor = texture3.get(calculatedUV);
+      else if (index == 4) textureColor = texture4.get(calculatedUV);
+      else if (index == 5) textureColor = texture5.get(calculatedUV);
+      else if (index == 6) textureColor = texture6.get(calculatedUV);
+      else if (index == 7) textureColor = texture7.get(calculatedUV);
       else textureColor = t0;
     }
     
