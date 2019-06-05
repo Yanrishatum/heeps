@@ -51,4 +51,6 @@ class GifConvert extends Convert {
     save(output.getBytes());
   }
   
+  static var _ = Convert.register(new GifConvert());
+  
 }
