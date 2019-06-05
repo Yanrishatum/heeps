@@ -12,7 +12,7 @@
         "$haxe-error",
         "$haxe-trace"
       ],
-      "label": "Build",
+      "label": "Heeps_Build",
       "presentation": {
         "echo": true,
         "reveal": "silent",

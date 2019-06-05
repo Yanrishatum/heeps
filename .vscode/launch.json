@@ -10,7 +10,7 @@
       "type": "hl",
       "hxml": "build.hxml",
       "cwd": "${workspaceRoot}",
-      "preLaunchTask": "Build"
+      "preLaunchTask": "Heeps_Build"
     },
     {
       "name": "HashLink (attach)",
@@ -19,7 +19,7 @@
       "type": "hl",
       "hxml": "build.hxml",
       "cwd": "${workspaceRoot}",
-      "preLaunchTask": "Build"
+      "preLaunchTask": "Heeps_Build"
     }
   ]
 }
