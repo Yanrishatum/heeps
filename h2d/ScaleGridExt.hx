@@ -144,7 +144,7 @@ class ScaleGridExt extends h2d.TileGroup {
       dx = width - br - bl - rw * sizeX;
       rh = Std.int((height - bt - bb) / sizeY);
       dy = height - bt - bb - rh * sizeY;
-      trace(rw, dx, rh, dy, width, height, sizeX, sizeY);
+      // trace(rw, dx, rh, dy, width, height, sizeX, sizeY);
     }
 
     if( !tileBorders ) {
