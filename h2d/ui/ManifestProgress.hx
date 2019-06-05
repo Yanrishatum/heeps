@@ -1,5 +1,6 @@
 package h2d.ui;
 
+import hxd.Math;
 import hxd.fs.ManifestFileSystem;
 import hxd.res.ManifestLoader;
 
@@ -12,9 +13,15 @@ class ManifestProgress extends h2d.Object
   var color:Int;
   var onLoaded:Void->Void;
   
+  var totalBarHeight:Float;
+  var subBarHeight:Float;
+  var barWidth:Float;
+  
+  public var removeSelf:Bool = true;
+  
   public function new(loader:ManifestLoader, color:Int = 0xffffff, onLoaded:Void->Void, ?parent:h2d.Object)
   {
-    super();
+    super(parent);
     this.loader = loader;
     this.color = color;
     this.onLoaded = onLoaded;
@@ -28,23 +35,49 @@ class ManifestProgress extends h2d.Object
   
   public function start():Void
   {
+    var s2d = getScene();
+    var x = s2d.width * .1;
+    barWidth = s2d.width * .8;
+    totalBarHeight = Math.max(s2d.height * .02, 4);
+    subBarHeight = Math.max(s2d.height * .01, 2);
+    var barH = totalBarHeight + (subBarHeight + 2) * ManifestLoader.concurrentFiles;
+    g.y = (s2d.height - (barH + 4 + (text.font.lineHeight + text.lineSpacing) * 2)) / 2;
+    g.x = x;
+    text.y = g.y + barH + 4;
+    text.x = x;
+    text.maxWidth = barWidth;
+    
     loader.onLoaded = finish;
     loader.onFileLoadStarted = showFileName;
     loader.onFileLoadStarted = fileLoaded;
     loader.onFileProgress = fileProgress;
-    var s = getScene();
-    if (s != null)
-    {
-      text.maxWidth = s.width;
-      g.x = s.width * .25;
-      y = (s.height - 70) * .5;
-    }
-    else 
-    {
-      g.x = 0;
-      text.maxWidth = 400;
-    }
     loader.loadManifestFiles();
+  }
+  
+  function repaint()
+  {
+    g.clear();
+    
+    g.beginFill(color);
+    g.drawRect(0, 0, barWidth * (loader.loadedFiles / loader.totalFiles), totalBarHeight);
+    
+    var txt =  "Files: " + loader.loadedFiles + "/" + loader.totalFiles + "\n";
+    if (loader.tasks != null)
+    for (t in loader.tasks)
+    {
+      if (t.busy)
+      {
+        var ratio = t.total / t.loaded;
+        g.drawRect(0, totalBarHeight + 2 + t.slot * (2 + subBarHeight), barWidth * ratio, subBarHeight);
+        txt += t.entry.name + " " + Math.ceil(ratio * 100) + "% ";
+      }
+      else 
+      {
+        g.drawRect(0, totalBarHeight + 2 + t.slot * (2 + subBarHeight), barWidth, subBarHeight);
+      }
+    }
+    
+    text.text = txt;
   }
   
   function setProgress(b:Int, t:Int):Void
@@ -59,25 +92,30 @@ class ManifestProgress extends h2d.Object
   
   function finish():Void
   {
-    setProgress(1, 1);
+    // setProgress(1, 1);
+    repaint();
     text.text = "All done!";
+    if (removeSelf) remove();
     onLoaded();
   }
   
-  function showFileName(f:ManifestEntry)
+  function showFileName(task:LoaderTask)
   {
-    text.text = "Loading: " + f.path;
+    repaint();
+    // text.text = "Loading: " + task.entry.path;
   }
   
-  function fileLoaded(f:ManifestEntry)
+  function fileLoaded(task:LoaderTask)
   {
-    setProgress(1, 1);
-    text.text = "Loaded : " + f.path;
+    repaint();
+    // setProgress(1, 1);
+    // text.text = "Loaded : " + task.entry.path;
   }
   
-  function fileProgress(f:ManifestEntry, b:Int, t:Int)
+  function fileProgress(task:LoaderTask)
   {
-    setProgress(b, t);
+    repaint();
+    // setProgress(task.loaded, task.total);
   }
   
 }
