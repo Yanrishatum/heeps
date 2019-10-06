@@ -20,6 +20,7 @@ class ManifestEntry extends FileEntry
   private var contents:Array<ManifestEntry>;
   
   private var file:String;
+  private var originalFile:String;
   #if sys
   private var fio:sys.io.FileInput;
   #else
@@ -28,11 +29,12 @@ class ManifestEntry extends FileEntry
   private var loaded:Bool;
   #end
   
-  public function new(fs:ManifestFileSystem, name:String, relPath:String, file:String)
+  public function new(fs:ManifestFileSystem, name:String, relPath:String, file:String, ?originalFile:String)
   {
     this.fs = fs;
     this.name = name;
     this.relPath = relPath;
+    this.originalFile = originalFile;
     this.file = file;
     if (file == null)
     {
@@ -150,7 +152,7 @@ class ManifestEntry extends FileEntry
       js.Browser.window.fetch(file).then( 
         (res:js.html.Response) -> { return res.arrayBuffer(); }
       ).then(
-        (buf:js.html.ArrayBuffer) -> {
+        (buf:js.lib.ArrayBuffer) -> {
           loaded = true;
           bytes = Bytes.ofData(buf);
           if (onReady != null) onReady();
@@ -269,9 +271,9 @@ class ManifestFileSystem implements FileSystem {
     
     this.manifest = new Map();
     
-    inline function insert(path:String, file:String):Void
+    inline function insert(path:String, file:String, original:String):Void
     {
-      var dir:Array<String> = Path.directory(path).split('/');
+      var dir:Array<String> = Path.directory(original).split('/');
       var r:ManifestEntry = root;
       for (n in dir)
       {
@@ -293,7 +295,7 @@ class ManifestFileSystem implements FileSystem {
           r = dirEntry;
         }
       }
-      var entry:ManifestEntry = new ManifestEntry(this, Path.withoutDirectory(path), path, file);
+      var entry:ManifestEntry = new ManifestEntry(this, Path.withoutDirectory(original), path, file, original);
       r.contents.push(entry);
       manifest.set(path, entry);
     }
@@ -308,22 +310,28 @@ class ManifestFileSystem implements FileSystem {
         throw "Serialized manifest not yet supported!";
       case 'm'.code:
         // id:path mapping
-        var mapping:Array<String> = _manifest.getString(2, _manifest.length - 2, Encoding.UTF8).split("\n");
-        for (map in mapping)
-        {
-          var idx:Int = map.indexOf(":");
-          insert(map.substr(0, idx), baseDir + map.substr(idx+1));
-        }
+        throw "Mapping manifest not yet supported";
+        // var mapping:Array<String> = _manifest.getString(2, _manifest.length - 2, Encoding.UTF8).split("\n");
+        // for (map in mapping)
+        // {
+        //   var idx:Int = map.indexOf(":");
+        //   insert(map.substr(0, idx), baseDir + map.substr(idx+1));
+        // }
       case 'l'.code:
         // path mapping
-        var mapping:Array<String> = _manifest.getString(2, _manifest.length - 2, Encoding.UTF8).split("\n");
-        for (path in mapping)
-        {
-          insert(path, baseDir + path);
-        }
-      case '{'.code:
+        throw "List manifest not yet supported";
+        // var mapping:Array<String> = _manifest.getString(2, _manifest.length - 2, Encoding.UTF8).split("\n");
+        // for (path in mapping)
+        // {
+        //   insert(path, baseDir + path);
+        // }
+      case '['.code:
         // JSON
-        throw "JSON manifest not yet supported!";
+        var json:Array<{ path:String, original:String }> = haxe.Json.parse(_manifest.toString());
+        for (entry in json)
+        {
+          insert(entry.path, baseDir + entry.path, entry.original);
+        }
     }
   }
   
