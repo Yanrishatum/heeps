@@ -295,7 +295,7 @@ class ManifestFileSystem implements FileSystem {
           r = dirEntry;
         }
       }
-      var entry:ManifestEntry = new ManifestEntry(this, Path.withoutDirectory(original), path, file, original);
+      var entry:ManifestEntry = new ManifestEntry(this, Path.withoutDirectory(original), original, file, original);
       r.contents.push(entry);
       manifest.set(path, entry);
     }
