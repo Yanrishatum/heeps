@@ -5,7 +5,7 @@ import format.tmx.Data;
 import hxd.res.TiledMapFile;
 import h2d.SpriteBatchExt;
 
-class TilemapLayer extends SpriteBatchExt
+class TilemapLayer extends TileGroupExt
 {
   
   var map:TiledMapData;
@@ -18,37 +18,6 @@ class TilemapLayer extends SpriteBatchExt
     super(parent);
     var ox = layer.x + layer.offsetX;
     var oy = layer.y + layer.offsetY;
-    
-    inline function tileAt(tx:Int, ty:Int, ox:Float, oy:Float, tile:TmxTile)
-    {
-      // TODO: Proper offsets
-      // TODO: Render-order
-      // TODO: Anything but ortho
-      var t = map.getTile(tile.gid);
-      if (t != null)
-      {
-        var b = alloc(t);
-        b.x = tx * map.tmx.tileWidth + ox;
-        b.y = ty * map.tmx.tileHeight + oy;
-        if (tile.flippedHorizontally)
-        {
-          b.x += b.t.width;
-          b.scaleX = -1;
-        }
-        if (tile.flippedVertically)
-        {
-          b.y += b.t.height;
-          b.scaleY = -1;
-        }
-        if (tile.flippedDiagonally)
-        {
-          b.x += b.t.width * b.scaleX;
-          b.y += b.t.height * b.scaleY;
-          b.scaleX *= -1;
-          b.scaleY *= -1;
-        }
-      }
-    }
     
     var ix = 0, iy = 0;
     var i = 0;
@@ -63,7 +32,7 @@ class TilemapLayer extends SpriteBatchExt
         tiles = c.tiles;
         while (i < tiles.length)
         {
-          tileAt(ix, iy, cx, cy, tiles[i++]);
+          addTile(ix, iy, cx, cy, tiles[i++]);
           if (++ix == c.width) { ix = 0; iy++; }
         }
       }
@@ -71,9 +40,46 @@ class TilemapLayer extends SpriteBatchExt
       tiles = layer.data.tiles;
       while (i < tiles.length)
       {
-        tileAt(ix, iy, ox, oy, tiles[i++]);
+        addTile(ix, iy, ox, oy, tiles[i++]);
         if (++ix == layer.width) { ix = 0; iy++; }
       }
+    }
+  }
+  
+  public function gidAt(x:Int, y:Int):Int {
+    if (x < 0 || x >= layer.width || y < 0 || y >= layer.height) return 0;
+    return layer.data.tiles[y * layer.width + x].gid;
+  }
+  
+  public function addTile(tx:Int, ty:Int, ox:Float, oy:Float, tile:TmxTile) {
+    // TODO: Proper offsets
+    // TODO: Render-order
+    // TODO: Anything but ortho
+    var t = map.getTile(tile.gid);
+    if (t != null)
+    {
+      var sx = 1;
+      var sy = 1;
+      var x = tx * map.tmx.tileWidth + ox;
+      var y = ty * map.tmx.tileHeight + oy;
+      if (tile.flippedHorizontally)
+      {
+        x += t.width;
+        sx = -1;
+      }
+      if (tile.flippedVertically)
+      {
+        y += t.height;
+        sy = -1;
+      }
+      if (tile.flippedDiagonally)
+      {
+        x += t.width * sx;
+        y += t.height * sy;
+        sx *= -1;
+        sy *= -1;
+      }
+      addTransform(x, y, sx, sy, 0, t);
     }
   }
   

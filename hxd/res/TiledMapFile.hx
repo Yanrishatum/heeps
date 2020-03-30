@@ -1,5 +1,6 @@
 package hxd.res;
 
+import haxe.io.Path;
 import h2d.Tile;
 #if (format_tiled >= "2.0.0")
 
@@ -64,8 +65,12 @@ class TiledMapTileset {
 
 class TiledMapFile extends Resource {
 
-    var reader : Reader;
-
+  var reader : Reader;
+  #if !disable_tsx_cache
+  static var tsxCache:Map<String, TmxTileset> = [];
+  static var tilesetCache:Map<String, Array<h2d.Tile>> = [];
+  #end
+  
     /**
     Parses TMX file and optionally resolves TSX references and loads tileset images. objectTypes can be provided to add their properties to objects.
   **/
@@ -87,6 +92,18 @@ class TiledMapFile extends Resource {
           tileset: tset,
           tiles: new Array()
         };
+        #if !disable_tsx_cache
+        var cacheName:String = null;
+        if (tset.source != null) {
+          cacheName = Path.join([entry.directory, tset.source]);
+          var cached = tilesetCache.get(cacheName);
+          if (cached != null) {
+            tileset.tiles = cached;
+            tilesets.push(tileset);
+            continue;
+          }
+        }
+        #end
         if (tset.image != null && tset.image.source != null) {
           if (haxe.io.Path.isAbsolute(tset.image.source)) throw "Cannot load tileset image with absolute path!";
           var texture = hxd.res.Loader.currentInstance.load(haxe.io.Path.join([entry.directory, tset.image.source])).toTexture();
@@ -114,6 +131,11 @@ class TiledMapFile extends Resource {
             tileset.tiles.push(hxd.res.Loader.currentInstance.load(haxe.io.Path.join([entry.directory, tile.image.source])).toTile());
           }
         }
+        #if !disable_tsx_cache
+        if (cacheName != null) {
+          tilesetCache.set(cacheName, tileset.tiles);
+        }
+        #end
         tilesets.push(tileset);
       }
     }
@@ -123,9 +145,19 @@ class TiledMapFile extends Resource {
 
   function loadTsx( path : String ) : TmxTileset {
     if (haxe.io.Path.isAbsolute(path)) throw "Cannot load TSX with absolute path!";
-    var res = hxd.res.Loader.currentInstance.load( haxe.io.Path.join([entry.directory, path]));
+    var path = haxe.io.Path.join([entry.directory, path]);
+    var tsx;
+    #if !disable_tsx_cache
+    tsx = tsxCache.get(path);
+    if (tsx != null) return tsx;
+    #end
+    var res = hxd.res.Loader.currentInstance.load(path);
     if ( res != null ) {
-      return reader.readTSX(Xml.parse(res.entry.getText()));
+      tsx = reader.readTSX(Xml.parse(res.entry.getText()));
+      #if !disable_tsx_cache
+      tsxCache.set(path, tsx);
+      #end
+      return tsx;
     }
     throw "Could not find Tsx at path '" + path + "' relative to '" + entry.directory + "'!";
   }

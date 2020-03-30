@@ -15,7 +15,7 @@ class GifImage extends Resource {
   **/
   public function toImage():Image
   {
-    return hxd.res.Loader.currentInstance.load(Path.withExtension(entry.path, "png")).toImage();
+    return hxd.res.Loader.currentInstance.load(Path.withExtension(".tmp/" + entry.path, "png")).toImage();
   }
   
   /**
@@ -29,7 +29,7 @@ class GifImage extends Resource {
     var frames = rd.readUInt16();
     var width = rd.readInt32();
     var height = rd.readInt32();
-    var img = hxd.res.Loader.currentInstance.load(Path.withExtension(entry.path, "png")).toTexture();
+    var img = hxd.res.Loader.currentInstance.load(Path.withExtension(".tmp/" + entry.path, "png")).toTexture();
     
     var list:Array<AnimationFrame> = new Array();
     while (frames > 0)
@@ -47,5 +47,12 @@ class GifImage extends Resource {
   {
     return new Animation(toFrames(), parent);
   }
+  
+  static var _ = hxd.fs.Convert.register(new hxd.heeps.GifConvert());
+  static var __ = hxd.fs.FileConverter.addConfig({
+    "fs.convert": {
+      "gif": "giff"
+    }
+  });
   
 }

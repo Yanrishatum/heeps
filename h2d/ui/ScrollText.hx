@@ -49,7 +49,7 @@ class ScrollText extends Mask
   public function new(text:Text, width:Int, height:Int, ?parent:Object)
   {
     this.text = text;
-    this.htmlText = Std.instance(text, HtmlText);
+    this.htmlText = Std.downcast(text, HtmlText);
     super(width, height, parent);
     scrollStep = text.font.lineHeight + text.lineSpacing;
     addChild(text);
@@ -136,26 +136,26 @@ class ScrollText extends Mask
   function mouseDrag(e:Event):Void
   {
     var diffY = e.relY - dragY;
-    scrollTo(refV - (diffY / scrollStep));
+    scrollTextTo(refV - (diffY / scrollStep));
   }
   
   function onWheel(e:Event):Void
   {
-    scrollBy(e.wheelDelta);
+    scrollTextBy(e.wheelDelta);
   }
   
   /**
     Shifts current `scrollV` by `steps` and invokes `onScrollV`.
   **/
-  public inline function scrollBy(steps:Float):Void
+  public inline function scrollTextBy(steps:Float):Void
   {
-    scrollTo(scrollV + steps);
+    scrollTextTo(scrollV + steps);
   }
   
   /**
     Sets `scrollV` and invokes `onScrollV`.
   **/
-  public function scrollTo(v:Float):Void
+  public function scrollTextTo(v:Float):Void
   {
     var old = scrollV;
     onScrollV(scrollV = v, old);

@@ -26,7 +26,7 @@ class Extensions
       return false;
     }
     
-    patch("h2d.Object");
+    // patch("h2d.Object");
     // patch("h2d.Layers"); // TODO: Fix
   }
   #end

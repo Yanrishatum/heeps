@@ -8,7 +8,7 @@ import h2d.col.Collider;
   A simple button with simple premade 4 states.
   Based on openfl.display.SimpleButton design.
 **/
-class SimpleButton extends Interactive
+class SimpleButton extends EventInteractive
 {
   
   var idle:Object;

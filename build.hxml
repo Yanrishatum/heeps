@@ -1,10 +1,9 @@
 -lib heaps
+-lib heeps
 -lib hldx
 -lib format-tiled
 -cp samples
--cp .
 # -D analyzer-optimize
 -D resourcesPath=samples/res
-extraParams.hxml
 -main Main
 -hl game.hl

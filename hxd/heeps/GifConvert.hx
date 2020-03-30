@@ -47,10 +47,7 @@ class GifConvert extends Convert {
     
     var imageOut = new haxe.io.BytesOutput();
     new format.png.Writer(imageOut).write(format.png.Tools.build32BGRA(w, mh * fc, image));
-    hxd.File.saveBytes(haxe.io.Path.withExtension(srcPath, "png"), imageOut.getBytes());
+    hxd.File.saveBytes(haxe.io.Path.withExtension(dstPath, "png"), imageOut.getBytes());
     save(output.getBytes());
   }
-  
-  static var _ = Convert.register(new GifConvert());
-  
 }
