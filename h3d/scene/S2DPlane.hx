@@ -80,14 +80,14 @@ class S2DPlane extends Mesh
     }
   }
   
-  override public function dispose()
+  override public function onRemove()
   {
+    super.onRemove();
     _texture.dispose();
     _texture = null;
     root.removeChildren();
     root.plane = null;
     root = null;
-    super.dispose();
   }
   
 }
