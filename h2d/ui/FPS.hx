@@ -1,4 +1,4 @@
-package h2d;
+package h2d.ui;
 
 import h2d.Flow;
 import hxd.Timer;
