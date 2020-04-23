@@ -1,5 +1,6 @@
 package h2d.ui;
 
+import hxd.Event;
 import hxd.Math;
 import hxd.BitmapData;
 import h2d.Text;
@@ -107,11 +108,11 @@ class DevUI extends Flow {
   public function beginGroup(name:String, open:Bool = true)
   {
     var fold = new GroupFold(name, group);
-    fold.set(open);
     var g:Flow = new Flow(group);
+    fold.group = g;
     g.layout = Vertical;
     addGroup(g);
-    g.visible = open;
+    fold.set(open);
     return g;
   }
   
@@ -174,7 +175,7 @@ private class WatchStat implements IWatcher {
   {
     this.t = t;
     this.get = get;
-    this.prefix = prefix == null ? "" : (prefix + ":");
+    this.prefix = prefix == null ? "" : (prefix + ": ");
   }
   
   public function invalidate()
@@ -209,6 +210,8 @@ private class GroupFold extends Interactive {
   var arrow:Bitmap;
   var label:Text;
   
+  public var group:Object;
+  
   var shown:Bool;
   
   public function new(text:String, ?parent:Object)
@@ -235,14 +238,20 @@ private class GroupFold extends Interactive {
     width = label.textWidth + 12;
   }
   
+  override public function onClick(e:Event)
+  {
+    set(!shown);
+  }
+  
   public inline function set(open:Bool)
   {
     shown = open;
+    group.visible = open;
   }
   
   override function sync(ctx:RenderContext)
   {
-    arrow.rotation = Math.lerp(arrow.rotation, shown ? _rot : 0, 0.01);
+    arrow.rotation = Math.lerp(arrow.rotation, shown ? _rot : 0, 0.1);
     super.sync(ctx);
   }
   
