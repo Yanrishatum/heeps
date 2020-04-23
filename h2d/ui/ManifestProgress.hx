@@ -67,7 +67,7 @@ class ManifestProgress extends h2d.Object
     {
       if (t.busy)
       {
-        var ratio = t.total / t.loaded;
+        var ratio = t.loaded / t.total;
         g.drawRect(0, totalBarHeight + 2 + t.slot * (2 + subBarHeight), barWidth * ratio, subBarHeight);
         txt += t.entry.name + " " + Math.ceil(ratio * 100) + "% ";
       }

@@ -28,7 +28,8 @@ class ManifestLoader extends hxd.res.Loader
   {
     super(fs);
     mfs = fs;
-    totalFiles = Lambda.count(fs.manifest);
+    totalFiles = 0;
+    for (f in fs.manifest) totalFiles++;
     loadedFiles = 0;
     loading = false;
   }
