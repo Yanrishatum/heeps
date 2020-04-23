@@ -35,15 +35,15 @@ class CustomButton extends EventInteractive
     state = Idle;
     this.views = views != null ? views : [];
     for (v in views) {
-      if (Std.is(v, Object)) {
-        addChild(cast v);
-      }
+      // if (Std.is(v, Object) && cast (v:Object) != this) {
+      //   addChild(cast v);
+      // }
+      v.setState(state, flags);
     }
     onOverEvent.add(setStateOver);
     onOutEvent.add(setStateOut);
     onPushEvent.add(setStatePress);
-    onReleaseOutsideEvent.add(setStateUnpress);
-    onClickEvent.add(setStateUnpress);
+    onReleaseEvent.add(setStateUnpress);
   }
   
   override public function addChildAt(s:Object, pos:Int)
@@ -70,7 +70,7 @@ class CustomButton extends EventInteractive
   
   inline function updateState(to:ButtonState) {
     state = to;
-    if (simState != 0xff) invalidate();
+    if (simState == 0xff) invalidate();
   }
   
   public function setFlag(flag:ButtonFlags, value:Bool)
