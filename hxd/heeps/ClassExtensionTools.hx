@@ -5,7 +5,7 @@ import haxe.macro.Context;
 
 class ClassExtensionTools
 {
-  
+  #if macro
   public static function makeVar(fields:Array<Field>, name:String, access:Array<Access>, type:ComplexType, ?def:Expr, ?pos:Position, ?doc:String, ?meta:Metadata):Void
   {
     if (pos == null) pos = def != null ? def.pos : Context.currentPos();
@@ -292,5 +292,7 @@ class ClassExtensionTools
     }
     return null;
   }
+  
+  #end
   
 }

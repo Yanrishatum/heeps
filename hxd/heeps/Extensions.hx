@@ -29,7 +29,6 @@ class Extensions
     // patch("h2d.Object");
     // patch("h2d.Layers"); // TODO: Fix
   }
-  #end
   
   public static function patch_h2d_Object():Array<Field>
   {
@@ -264,4 +263,5 @@ class Extensions
     return fields;
   }
   
+  #end
 }
