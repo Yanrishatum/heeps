@@ -2,9 +2,9 @@
 -cp .
 samples/DocMacro.hx
 --macro cherry.macro.Helper.init()
---macro samples.DocMacro.include('h3d')
---macro samples.DocMacro.include('h2d')
---macro samples.DocMacro.include('hxd')
+--macro samples.DocMacro.include('ch2')
+--macro samples.DocMacro.include('ch3')
+--macro samples.DocMacro.include('cherry')
 --macro samples.DocMacro.store()
 -D doc-gen
 -xml docs/doc.xml

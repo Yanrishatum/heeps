@@ -2,7 +2,7 @@ package cherry.fmt.atl;
 
 import h2d.Anim;
 import h2d.Object;
-import h2d.Animation;
+import ch2.Animation;
 import h2d.Tile;
 
 class AtlasData {

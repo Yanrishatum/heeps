@@ -3,7 +3,7 @@ package cherry.res;
 import hxd.res.Image;
 import h2d.Object;
 import haxe.io.Path;
-import h2d.Animation;
+import ch2.Animation;
 import hxd.res.Resource;
 
 /**

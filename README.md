@@ -21,20 +21,22 @@ Library is in a state of migration due to multiple reasons. Changes are as follo
 * `h2d`, `h3d` and `hxd` packages used in the same way as Heaps do - 2D, 3D and general stuff.
 * `cherry.soup` package user for internal features, like macro functions and utility classes.
 * `cherry.tools` designated for `using cherry.tools.NTools;` that would extend standard functionality of existing Heaps objects.
-* `plugins` folder is for HIDE plugins.
+* `plugins` folder is for HIDE plugins (`cherry.plugins` is for classes that plugins utilize and most likely depend on HIDE).
 
 ## Features
 
 For a list of additional classes see `docs`. Listing every single class here is just not feasible at this point.  
 Below are specific remarks for some of the features or objects that I still have to document properly.
 
-* `h2d.Tilemap` - Basic Tilemap renderer. NOT PERFECT. It does not care about render-order and shit. I'll fix and improve it eventually, but not now.
+* `ch2.Tilemap` - Basic Tilemap renderer. NOT PERFECT. It does not care about render-order and shit. I'll fix and improve it eventually, but not now.
 * `h3d.scene.S2DPlane` - A 2D plane that renders s2d objects on it. Uses texture rendering. For more primitive approach see `h3d.scene.TileSprite`.
 * `cherry.res.GifImage` - Animated gif support with Res. Use `toAnimation` and `toFrames` to get animation data. `toImage` can be used to obtain spritesheet Image.
 * `cherry.res.TiledMapFile` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
 * `ManifestFileSystem` - js-oriented alternative to stupid embedding into .js file. More tricky to operate, and requires preloading. See below.
 
 ### Type Patching
+> Temporarily disabled
+
 Library also uses ~~black magic~~ macros to patch some base classes.  
 Can be disabled by `-D heeps_disable_patch_<path>`. E.g. `-D heaps_disable_patch_h2d_object` for `h2d.Object` patch. Note that some patches may rely on others. Alternatively `-D heeps_disable_patch` will disable all type patching.
 * `h2d.Object` - Added `originX` and `originY` that control origin offset for transofmrations. `transform` and `absoluteTransform` for overriding transform matrix with custom one.
