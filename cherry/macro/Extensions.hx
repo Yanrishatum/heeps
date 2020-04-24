@@ -1,7 +1,9 @@
-package hxd.heeps;
+package cherry.macro;
 
+#if macro
 import haxe.macro.Expr;
-using hxd.heeps.ClassExtensionTools;
+using cherry.macro.ClassExtensionTools;
+#end
 
 class Extensions
 {

@@ -1,2 +1,2 @@
---macro hxd.heeps.Extensions.init()
---macro hxd.heeps.HeepsMacro.init()
+--macro cherry.macro.Extensions.init()
+--macro cherry.macro.Helper.init()

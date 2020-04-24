@@ -1,6 +1,6 @@
 package h2d.ui;
 
-import hxd.heeps.EventSignal;
+import cherry.soup.EventSignal;
 import hxd.Event;
 import h2d.Interactive;
 

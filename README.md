@@ -19,7 +19,7 @@ Library is in a state of migration due to multiple reasons. Changes are as follo
 
 ## Structure
 * `h2d`, `h3d` and `hxd` packages used in the same way as Heaps do - 2D, 3D and general stuff.
-* `hxd.heaps` package user for internal Heaps features, like macro functions.
+* `cherry.soup` package user for internal features, like macro functions and utility classes.
 * `cherry.tools` designated for `using cherry.tools.NTools;` that would extend standard functionality of existing Heaps objects.
 * `plugins` folder is for HIDE plugins.
 
@@ -52,13 +52,13 @@ Currently there is only a draft version of layer renderer for Tiled utilizing `h
 ### Manifest FS
 Since we are sane people and don't want 50+MB js file that contains Base64-encoded game assets, we obviously want to load those files separately. Manifest-FS provides ability to load those files from a manifest file.  
 This approach requires some prep-work to get it running, but beats embedding everything in JS.  
-First, you have to generate manifest file with `hxd.fs.ManifestBuilder.create`, `generate` and `initManifest`. Last acts exactly the same as `Res.init*` functions and bakes manifest into the code. First just generates manifest FS in macro call and second one just does convert and optionally saves manifest to your res folder. I trust people here are smart enough to figure out how to utilize those two, so I'll focus on one I use, e.g. `initManifest` method.
+First, you have to generate manifest file with `cherry.fs.ManifestBuilder.create`, `generate` and `initManifest`. Last acts exactly the same as `Res.init*` functions and bakes manifest into the code. First just generates manifest FS in macro call and second one just does convert and optionally saves manifest to your res folder. I trust people here are smart enough to figure out how to utilize those two, so I'll focus on one I use, e.g. `initManifest` method.
 > I should note that all docs about resource management make you believe that you have to initialize them in `main`. THIS. IS. WRONG. Instead, you need to initialize them by overriding `hxd.App.loadAssets` and call `onLoaded` after everything's loaded. We're good? Good. There's one downside to this, hovewer. During `loadAssets` - heaps is not running main loop, hence you can't render anything, and if you want to do preloaders, do it in `init()`
 
 `initManifest` does not create typical `Loader` instance. Instead, it creates `cherry.res.ManifestLoader`, which you then should populate with progress handlers and call `loadManifestFiles`. Here's an example code of how you do this:
 ```haxe
 override private function init() {
-  var loader:cherry.res.ManifestLoader = hxd.fs.ManifestBuilder.initManifest();
+  var loader = cherry.fs.ManifestBuilder.initManifest();
   loader.onLoaded = () -> { trace("All loaded!"); startGame(); }
   loader.onFileLoadStarted = (f) -> trace("Started loading file: " + f.path);
   loader.onFileLoaded = (f) -> trace("Finished loading file: " + f.path);

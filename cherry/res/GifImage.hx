@@ -49,7 +49,7 @@ class GifImage extends Resource {
     return new Animation(toFrames(), parent);
   }
   
-  static var _ = hxd.fs.Convert.register(new hxd.heeps.GifConvert());
+  static var _ = hxd.fs.Convert.register(new cherry.fs.Convert.GifConvert());
   static var __ = hxd.fs.FileConverter.addConfig({
     "fs.convert": {
       "gif": "giff"

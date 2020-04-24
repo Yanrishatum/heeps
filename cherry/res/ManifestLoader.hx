@@ -1,6 +1,6 @@
 package cherry.res;
 
-import hxd.fs.ManifestFileSystem;
+import cherry.fs.ManifestFileSystem;
 
 @:allow(hxd.res.ManifestLoader.LoaderTask)
 class ManifestLoader extends hxd.res.Loader

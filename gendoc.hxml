@@ -1,7 +1,7 @@
 -lib heaps
 -cp .
 samples/DocMacro.hx
---macro hxd.heeps.HeepsMacro.init()
+--macro cherry.macro.Helper.init()
 --macro samples.DocMacro.include('h3d')
 --macro samples.DocMacro.include('h2d')
 --macro samples.DocMacro.include('hxd')
