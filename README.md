@@ -20,7 +20,7 @@ Library is in a state of migration due to multiple reasons. Changes are as follo
 ## Structure
 * `h2d`, `h3d` and `hxd` packages used in the same way as Heaps do - 2D, 3D and general stuff.
 * `hxd.heaps` package user for internal Heaps features, like macro functions.
-* `hxd.tools` designated for `using hxd.tools.NTools;` that would extend standard functionality of existing Heaps objects.
+* `cherry.tools` designated for `using cherry.tools.NTools;` that would extend standard functionality of existing Heaps objects.
 * `plugins` folder is for HIDE plugins.
 
 ## Features
@@ -30,8 +30,8 @@ Below are specific remarks for some of the features or objects that I still have
 
 * `h2d.Tilemap` - Basic Tilemap renderer. NOT PERFECT. It does not care about render-order and shit. I'll fix and improve it eventually, but not now.
 * `h3d.scene.S2DPlane` - A 2D plane that renders s2d objects on it. Uses texture rendering. For more primitive approach see `h3d.scene.TileSprite`.
-* `hxd.res.GifImage` - Animated gif support with Res. Use `toAnimation` and `toFrames` to get animation data. `toImage` can be used to obtain spritesheet Image.
-* `hxd.res.TiledMapFile` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
+* `cherry.res.GifImage` - Animated gif support with Res. Use `toAnimation` and `toFrames` to get animation data. `toImage` can be used to obtain spritesheet Image.
+* `cherry.res.TiledMapFile` - when `format-tiled` library used, replaces `hxd.res.TiledMap` and provides better support for it.
 * `ManifestFileSystem` - js-oriented alternative to stupid embedding into .js file. More tricky to operate, and requires preloading. See below.
 
 ### Type Patching
@@ -55,10 +55,10 @@ This approach requires some prep-work to get it running, but beats embedding eve
 First, you have to generate manifest file with `hxd.fs.ManifestBuilder.create`, `generate` and `initManifest`. Last acts exactly the same as `Res.init*` functions and bakes manifest into the code. First just generates manifest FS in macro call and second one just does convert and optionally saves manifest to your res folder. I trust people here are smart enough to figure out how to utilize those two, so I'll focus on one I use, e.g. `initManifest` method.
 > I should note that all docs about resource management make you believe that you have to initialize them in `main`. THIS. IS. WRONG. Instead, you need to initialize them by overriding `hxd.App.loadAssets` and call `onLoaded` after everything's loaded. We're good? Good. There's one downside to this, hovewer. During `loadAssets` - heaps is not running main loop, hence you can't render anything, and if you want to do preloaders, do it in `init()`
 
-`initManifest` does not create typical `Loader` instance. Instead, it creates `hxd.res.ManifestLoader`, which you then should populate with progress handlers and call `loadManifestFiles`. Here's an example code of how you do this:
+`initManifest` does not create typical `Loader` instance. Instead, it creates `cherry.res.ManifestLoader`, which you then should populate with progress handlers and call `loadManifestFiles`. Here's an example code of how you do this:
 ```haxe
 override private function init() {
-  var loader:hxd.res.ManifestLoader = hxd.fs.ManifestBuilder.initManifest();
+  var loader:cherry.res.ManifestLoader = hxd.fs.ManifestBuilder.initManifest();
   loader.onLoaded = () -> { trace("All loaded!"); startGame(); }
   loader.onFileLoadStarted = (f) -> trace("Started loading file: " + f.path);
   loader.onFileLoaded = (f) -> trace("Finished loading file: " + f.path);

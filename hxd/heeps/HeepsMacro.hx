@@ -36,13 +36,14 @@ class HeepsMacro
       else StringTools.replace(f, "gif,", ",");
       hxd.res.Config.extensions.set(k, v);
     }
-    hxd.res.Config.extensions.set("giff,gif", "hxd.res.GifImage");
+    hxd.res.Config.extensions.set("giff,gif", "cherry.res.GifImage");
     // hxd.res.Config.pairedExtensions.set("giff", "png,gif");
     hxd.res.Config.pairedExtensions.set("gif", "png");
+    hxd.res.Config.extensions.set("atl", "cherry.res.AtlAtlas");
     
     // Register converts
-    Compiler.include("hxd.res.GifImage");
-    Compiler.keep("hxd.res.GifImage");
+    Compiler.include("cherry.res.GifImage");
+    Compiler.keep("cherry.res.GifImage");
     // trace(@:privateAccess hxd.fs.Convert.converts);
     // trace(@:privateAccess hxd.fs.FileConverter.extraConfigs);
     // trace(hxd.res.Config.extensions);
@@ -51,7 +52,7 @@ class HeepsMacro
     
     if (Context.definedValue("format-tiled") >= "2.0.0")
     {
-      hxd.res.Config.extensions.set("tmx", "hxd.res.TiledMapFile");
+      hxd.res.Config.extensions.set("tmx", "cherry.res.TiledMapFile");
     }
   }
   

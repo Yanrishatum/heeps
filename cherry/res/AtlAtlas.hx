@@ -19,7 +19,7 @@ class AtlAtlas extends Resource {
     
     library = new AtlasData();
     library.load(Json.parse(entry.getText()));
-    var tile = library.texture = Res.loader.loadCache(Path.join([entry.directory, library.texturePath]), Image).toTile();
+    var tile = library.texture = Res.loader.loadCache(library.texturePath, Image).toTile();
     for (s in library.sprites) s.tile = tile.sub(s.x, s.y, s.width, s.height);
     if (ENABLE_AUTO_WATCH) watch(updateAtlas);
     return null;
@@ -31,7 +31,7 @@ class AtlAtlas extends Resource {
     lib.load(data);
     var cur = library;
     if (lib.texturePath != cur.texturePath) {
-      var tex = Res.loader.loadCache(Path.join([entry.directory, cur.texturePath]), Image).toTexture();
+      var tex = Res.loader.loadCache(cur.texturePath, Image).toTexture();
       cur.texture.innerTex = tex;
       cur.texture.width = tex.width;
       cur.texture.height = tex.height;

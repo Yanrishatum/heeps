@@ -2,7 +2,7 @@ package h2d.ui;
 
 import hxd.Math;
 import hxd.fs.ManifestFileSystem;
-import hxd.res.ManifestLoader;
+import cherry.res.ManifestLoader;
 
 class ManifestProgress extends h2d.Object
 {

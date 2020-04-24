@@ -16,7 +16,7 @@ class ManifestBuilder
     var data = makeManifest(basePath, options, storeManifest);
     if (basePath == null) basePath = "res";
     return macro {
-      var loader = new hxd.res.ManifestLoader(@:privateAccess new hxd.fs.ManifestFileSystem($v{basePath}, haxe.io.Bytes.ofString($v{data.manifest.toString()})));
+      var loader = new cherry.res.ManifestLoader(@:privateAccess new hxd.fs.ManifestFileSystem($v{basePath}, haxe.io.Bytes.ofString($v{data.manifest.toString()})));
       hxd.Res.loader = loader;
       loader;
     }
