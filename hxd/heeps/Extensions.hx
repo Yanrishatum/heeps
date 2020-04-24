@@ -8,7 +8,7 @@ class Extensions
   #if macro
   public static function init():Void
   {
-    if (haxe.macro.Context.defined("heeps_disable_patch")) return;
+    if (haxe.macro.Context.defined("heeps_disable_patch") || haxe.macro.Context.defined("hide_plugin")) return;
     
     inline function patch(pack:String, ?extra:Array<String>):Bool
     {

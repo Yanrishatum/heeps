@@ -1,2 +1,6 @@
 game.hl
 .vscode
+*.js
+*.js.map
+*.bat
+.tmp

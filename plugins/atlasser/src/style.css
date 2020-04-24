@@ -1,0 +1,36 @@
+.tile-preview {
+  display: inline-block;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.tile-preview.mag {
+  image-rendering: pixelated;
+}
+
+.anim-info dd.selectable {
+  padding-bottom: 4px;
+}
+.anim-info dd.selectable.selected {
+  padding-bottom: 3px;
+  border-bottom: 1px solid #cccccc;
+}
+.anim-info .btn {
+  width: 20px;
+  margin-right: 2px;
+  padding-left: 6px;
+}
+
+.anim-info .info {
+  width: initial;
+  font-size: 7pt;
+}
+
+dd.vec2>input {
+  width: 65px;
+}
+dd.vec2>input:last-child {
+  width: 66px;
+}
+dd.vec2>span {
+  text-align: right;
+}

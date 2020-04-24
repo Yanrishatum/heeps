@@ -1,0 +1,10 @@
+-cp src
+-lib hide
+-D hide_plugin
+-lib heeps
+-lib hxnodejs
+-lib castle
+--macro hide.Plugin.init()
+-js atlasser-plug.js
+-debug
+HideImports

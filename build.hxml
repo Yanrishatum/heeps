@@ -1,6 +1,7 @@
 -lib heaps
 -lib heeps
--lib hldx
+# -lib hldx
+-lib hlsdl
 -lib format-tiled
 -cp samples
 # -D analyzer-optimize
