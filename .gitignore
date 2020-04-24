@@ -4,3 +4,4 @@ game.hl
 *.js.map
 *.bat
 .tmp
+!plugins/bin/*
