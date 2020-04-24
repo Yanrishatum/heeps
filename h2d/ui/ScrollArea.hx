@@ -9,15 +9,6 @@ import h2d.col.Bounds;
 class ScrollArea extends Mask
 {
   
-  public var scrollX(default, set):Float = 0;
-  public var scrollY(default, set):Float = 0;
-  
-  // Are disregarded for not, so let's not confuse people.
-  // public var scrollVertically:Bool = true;
-  // public var scrollHorizontally:Bool = true;
-  
-  public var scrollBounds:Bounds;
-  
   /**
     A scroll step when scrolled via `scrollBy`
   **/
@@ -30,27 +21,13 @@ class ScrollArea extends Mask
     this.scrollBounds = bounds;
   }
   
-  function set_scrollX(v:Float):Float
-  {
-    if (scrollBounds != null) v = hxd.Math.clamp(v, scrollBounds.xMin, scrollBounds.xMax - width);
-    posChanged = true;
-    return scrollX = v;
-  }
-  
-  function set_scrollY(v:Float):Float
-  {
-    if (scrollBounds != null) v = hxd.Math.clamp(v, scrollBounds.yMin, scrollBounds.yMax - height);
-    posChanged = true;
-    return scrollY = v;
-  }
-  
-  function scrollBy(deltaX:Float, deltaY:Float):Void
+  override public function scrollBy(deltaX:Float, deltaY:Float):Void
   {
     scrollX += deltaX * scrollStep;
     scrollY += deltaY * scrollStep;
   }
   
-  function scrollPixels(x:Float, y:Float):Void
+  public function scrollPixels(x:Float, y:Float):Void
   {
     scrollX += x;
     scrollY += y;
