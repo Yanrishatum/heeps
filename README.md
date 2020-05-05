@@ -54,12 +54,22 @@ Currently there is only a draft version of layer renderer for Tiled utilizing `h
 ### Manifest FS
 Since we are sane people and don't want 50+MB js file that contains Base64-encoded game assets, we obviously want to load those files separately. Manifest-FS provides ability to load those files from a manifest file.  
 This approach requires some prep-work to get it running, but beats embedding everything in JS.  
-First, you have to generate manifest file with `cherry.fs.ManifestBuilder.create`, `generate` and `initManifest`. Last acts exactly the same as `Res.init*` functions and bakes manifest into the code. First just generates manifest FS in macro call and second one just does convert and optionally saves manifest to your res folder. I trust people here are smart enough to figure out how to utilize those two, so I'll focus on one I use, e.g. `initManifest` method.
+There are 3 general methods to generate manifests declared in `cherry.fs.ManifestBuilder`:
+* `initManifest` - your parimary way to initialize MFS that works same way as `Res.initLocal` / `Res.initEmbed` with exception of requirement to then load those resources. See sample below. This method hardcodes manifest into source code.
+* `generaate` - can be used to just process resources (run Converts) and save it as external manifest file. This is more advanced method in case asset composition is expected to change, but it's not worth uploading new game build. Note that in this approach, MFS should be created manually and not with `initManifest` or `create`, and you would need to load manifest beforehand in order to pass it to MFS instance. I'm not going to cover it in detail, but here's general flow pseudocode: `BinaryLoader.load("manifest.json")` -> `Res.loader = createMFS(manifestFile)` -> `loadManifest()`
+* `create` is a light version of `initManifest` and designated to be used when multiple file systems are involved. This method creates and hardcodes manifest into the code, returning MFS loader instance, which then can be used in multi-FS setup. Main difference with `initManifest` is that it does not assign MFS as primary `Res.loader`.
+
 > I should note that all docs about resource management make you believe that you have to initialize them in `main`. THIS. IS. WRONG. Instead, you need to initialize them by overriding `hxd.App.loadAssets` and call `onLoaded` after everything's loaded. We're good? Good. There's one downside to this, hovewer. During `loadAssets` - heaps is not running main loop, hence you can't render anything, and if you want to do preloaders, do it in `init()`
 
-`initManifest` does not create typical `Loader` instance. Instead, it creates `cherry.res.ManifestLoader`, which you then should populate with progress handlers and call `loadManifestFiles`. Here's an example code of how you do this:
+`ManifestBuilder` does not create typical `Loader` instance. Instead, it creates `cherry.res.ManifestLoader`, which you then should populate with progress handlers and call `loadManifestFiles`. Here's an example code of how you do this:
 ```haxe
 override private function init() {
+  
+  // For JS you can specify amount of concurrent file loadings, which defaults to 4.
+  // Not applicable to HL, because it loads everything in main thread.
+  ManifestLoader.concurrentFiles = 8;
+  
+  // Low-level approach is to hook loader directly.
   var loader = cherry.fs.ManifestBuilder.initManifest();
   loader.onLoaded = () -> { trace("All loaded!"); startGame(); }
   loader.onFileLoadStarted = (f) -> trace("Started loading file: " + f.path);
@@ -67,13 +77,20 @@ override private function init() {
   // This only happens when you use JS target, since sys target is synchronous.
   loader.onFileProgress = (f, loaded, total) -> trace("Loading file progress: " + f.path + ", " + loaded + "/" + total);
   loader.loadManifestFiles();
+  
+  // Higher-level approach with usage of provided MFS preloader
+  // ManifestProgress will hook onto method and will render simple progress-bar while it loads resources.
+  var loader = cherry.fs.ManifestBuilder.initManifest();
+  var preloader = h2d.ui.ManifestProgress(loader, startGame, s2d);
+  preloader.start();
 }
 
 function startGame() {
   // Actual boot, now that all resources are loaded.
 }
 ```
-Additionally, if you want to visualize loading progress, but don't want anything fancy - there is `h2d.ui.ManifestProgress` with primitive progress-bar if you don't need any fancy mumbo-jumbo and just want your resources loaded while showing player that it actually loads.
+* If you want to visualize loading progress, but don't need anything fancy - using `ManifestProgress` is better, as it provides primitive progress-bar without any extra mumbo-jumbo and just want your resources loaded while showing player that it actually loads. You can easily create your own progress renderer based off ManifestProgress source code.
+* JS target uses concurrent file loadings to speed up game boot, and defaults it to 4 files at the same time.
 
 ## Extra flags
 * `-D gif_disable_margin` - Disables 1px top/bottom margin that avoids pixel bleeding for gif spritesheet generation.
