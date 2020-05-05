@@ -107,7 +107,7 @@ class TiledMapFile extends Resource {
         #end
         if (tset.image != null && tset.image.source != null) {
           if (haxe.io.Path.isAbsolute(tset.image.source)) throw "Cannot load tileset image with absolute path!";
-          var texture = hxd.res.Loader.currentInstance.load(haxe.io.Path.join([entry.directory, tset.image.source])).toTexture();
+          var texture = hxd.res.Loader.currentInstance.load(haxe.io.Path.join(tset.source != null ? [entry.directory, tset.source, "..", tset.image.source] : [entry.directory, tset.image.source])).toTexture();
           var x : Int = tset.margin;
           var xmax = texture.width - tset.margin;
           var y : Int = tset.margin;
