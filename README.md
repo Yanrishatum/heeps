@@ -48,8 +48,8 @@ Library provides rudimentary Tiled map editor integration. It's integration far 
 Tiled .tmx maps can be accessed via `hxd.Res` and parsed with `toMap()` function. Heeps will try to resolve all dependencies automatically, however it can be done manually afterwards.  
 Returned object will contain parsed `format.tmx.TiledMap` and a list of loaded tilesets that can be used to get `h2d.Tile` instances with ease.
 
-In future `h2d.tiled` will contain helper classes that would provide ability to visualise Tiled maps.
-Currently there is only a draft version of layer renderer for Tiled utilizing `h2d.SpriteBatchExt`. But it is limited to 8 unique textures per layer as well as not supports render-order (uses default right-bottom) and orientation other than orthogonal.
+In future `ch2.tiled` will contain helper classes that would provide ability to visualise Tiled maps.
+Currently there is only a draft version of layer renderer for Tiled utilizing `ch2.SpriteBatchExt`. But it is limited to 8 unique textures per layer as well as not supports render-order (uses default right-bottom) and orientation other than orthogonal.
 
 ### Manifest FS
 Since we are sane people and don't want 50+MB js file that contains Base64-encoded game assets, we obviously want to load those files separately. Manifest-FS provides ability to load those files from a manifest file.  
@@ -81,7 +81,7 @@ override private function init() {
   // Higher-level approach with usage of provided MFS preloader
   // ManifestProgress will hook onto method and will render simple progress-bar while it loads resources.
   var loader = cherry.fs.ManifestBuilder.initManifest();
-  var preloader = h2d.ui.ManifestProgress(loader, startGame, s2d);
+  var preloader = ch2.ui.ManifestProgress(loader, startGame, s2d);
   preloader.start();
 }
 

@@ -7,7 +7,7 @@ samples/DocMacro.hx
 --macro samples.DocMacro.include('ch2')
 --macro samples.DocMacro.include('ch3')
 --macro samples.DocMacro.include('cherry')
---macro samples.DocMacro.include('h2d.ui')
+--macro samples.DocMacro.include('ch2.ui')
 --macro samples.DocMacro.store()
 -D doc-gen
 -xml docs/doc.xml
