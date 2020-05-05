@@ -53,8 +53,26 @@ Currently there is only a draft version of layer renderer for Tiled utilizing `h
 
 ### Manifest FS
 Since we are sane people and don't want 50+MB js file that contains Base64-encoded game assets, we obviously want to load those files separately. Manifest-FS provides ability to load those files from a manifest file.  
-This approach requires some prep-work to get it running, but beats embedding everything in JS.  
-First, you have to generate manifest file with `cherry.fs.ManifestBuilder.create`, `generate` and `initManifest`. Last acts exactly the same as `Res.init*` functions and bakes manifest into the code. First just generates manifest FS in macro call and second one just does convert and optionally saves manifest to your res folder. I trust people here are smart enough to figure out how to utilize those two, so I'll focus on one I use, e.g. `initManifest` method.
+This approach requires some prep-work to get it running, but beats embedding everything in JS.
+
+First, generate a manifest file with `cherry.fs.ManifestBuilder.generate`, like so:
+
+``` haxe
+cherry.fs.ManifestBuilder.generate("res", null, "manifest.json");
+```
+
+(You can also use `cherry.fs.ManifestBuilder.create` to generate manifest FS in a macro call.)
+
+When your manifest file is ready, you can create a preloader to load your assets with `cherry.res.ManifestLoader`, like this:
+
+``` haxe
+var loader = cherry.fs.ManifestBuilder.initManifest();
+var preloader = new h2d.ui.ManifestProgress(loader, () -> { trace("finished loading, you can start the game now"); }, s2d);
+preloader.start();
+```
+
+Alternatively, you can use the `initManifest` approach. `cherry.fs.ManifestBuilder.createinitManifest` acts exactly the same as `Res.init*` functions and bakes manifest into the code. 
+
 > I should note that all docs about resource management make you believe that you have to initialize them in `main`. THIS. IS. WRONG. Instead, you need to initialize them by overriding `hxd.App.loadAssets` and call `onLoaded` after everything's loaded. We're good? Good. There's one downside to this, hovewer. During `loadAssets` - heaps is not running main loop, hence you can't render anything, and if you want to do preloaders, do it in `init()`
 
 `initManifest` does not create typical `Loader` instance. Instead, it creates `cherry.res.ManifestLoader`, which you then should populate with progress handlers and call `loadManifestFiles`. Here's an example code of how you do this:
