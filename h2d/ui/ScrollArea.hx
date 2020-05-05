@@ -87,18 +87,10 @@ class ScrollArea extends Mask
     }
 
     ctx.flush();
-    if( ctx.hasRenderZone ) {
-      var oldX = ctx.renderX, oldY = ctx.renderY, oldW = ctx.renderW, oldH = ctx.renderH;
-      ctx.setRenderZone(x1, y1, x2-x1, y2-y1);
-      objDrawRec(ctx);
-      ctx.flush();
-      ctx.setRenderZone(oldX, oldY, oldW, oldH);
-    } else {
-      ctx.setRenderZone(x1, y1, x2-x1, y2-y1);
-      objDrawRec(ctx);
-      ctx.flush();
-      ctx.clearRenderZone();
-    }
+    ctx.pushRenderZone(x1, y1, x2-x1, y2-y1);
+    objDrawRec(ctx);
+    ctx.flush();
+    ctx.popRenderZone();
   }
   
   function objDrawRec(ctx:h2d.RenderContext) {
