@@ -129,7 +129,7 @@ class TiledMapFile extends Resource {
           // Image collection
           for (tile in tset.tiles) {
             if (haxe.io.Path.isAbsolute(tile.image.source)) throw "Cannot load tileset image with absolute path!";
-            tileset.tiles.push(hxd.res.Loader.currentInstance.load(haxe.io.Path.join([entry.directory, tile.image.source])).toTile());
+            tileset.tiles.push(hxd.res.Loader.currentInstance.load(haxe.io.Path.join(tset.source != null ? [entry.directory, tset.source, "..", tile.image.source] : [entry.directory, tile.image.source])).toTile());
           }
         }
         #if !disable_tsx_cache
