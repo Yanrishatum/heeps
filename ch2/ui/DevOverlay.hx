@@ -47,12 +47,19 @@ class DevOverlay extends Object {
     text.text = label;
   }
   
+  public function line(x0:Float, y0:Float, x1:Float, y1:Float, color:Int, width:Float = 1, alpha:Float = 1) {
+    g.lineStyle(width, color, alpha);
+    g.moveTo(x0, y0);
+    g.lineTo(x1, y1);
+    g.lineStyle();
+  }
+  
   override function drawRec(ctx:RenderContext)
   {
     super.drawRec(ctx);
     while (labelCount > 0)
     {
-      labels[labelCount--].visible = false;
+      labels[--labelCount].visible = false;
     }
     g.clear();
   }

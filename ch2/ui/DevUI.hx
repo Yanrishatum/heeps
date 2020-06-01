@@ -30,6 +30,35 @@ class DevUI extends Flow {
     group = this;
   }
   
+  public dynamic function onStateChange() {
+    
+  }
+  
+  public function getState() {
+    var groups:Map<String, Bool> = [];
+    for (c in children) {
+      var g = Std.downcast(c, GroupFold);
+      if (g != null) groups[g.name] = g.shown;
+    }
+    return {
+      groups: groups,
+      visible: this.visible
+    };
+  }
+  
+  public function restoreState(data:{ groups:Map<String, Bool>, visible:Bool }) {
+    if (data == null) return;
+    if (data.groups != null) {
+      for (kv in data.groups.keyValueIterator()) {
+        var o = this.getObjectByName(kv.key);
+        if (o == null) continue;
+        var g = Std.downcast(o, GroupFold);
+        if (g != null && g.shown != kv.value) g.set(kv.value);
+      }
+    }
+    this.visible = data.visible;
+  }
+  
   public function button(label:String, callback:Void->Void)
   {
     var b:Button = new Button(label, group);
@@ -113,7 +142,7 @@ class DevUI extends Flow {
   
   public function beginGroup(name:String, open:Bool = true)
   {
-    var fold = new GroupFold(name, group);
+    var fold = new GroupFold(name, group, this);
     var g:Flow = new Flow(group);
     fold.group = g;
     g.layout = Vertical;
@@ -215,14 +244,17 @@ private class GroupFold extends Interactive {
   
   var arrow:Bitmap;
   var label:Text;
+  var ui:DevUI;
   
   public var group:Object;
   
-  var shown:Bool;
+  public var shown(default, null):Bool;
   
-  public function new(text:String, ?parent:Object)
+  public function new(text:String, ?parent:Object, ui:DevUI)
   {
     super(0, 12, parent);
+    this.ui = ui;
+    this.name = text;
     if (_arrow == null)
     {
       var d = new BitmapData(8, 8);
@@ -247,6 +279,7 @@ private class GroupFold extends Interactive {
   override public function onClick(e:Event)
   {
     set(!shown);
+    ui.onStateChange();
   }
   
   public inline function set(open:Bool)
