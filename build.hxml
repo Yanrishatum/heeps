@@ -3,6 +3,7 @@
 # -lib hldx
 -lib hlsdl
 -lib format-tiled
+-lib bin-packing
 -cp samples
 # -D analyzer-optimize
 -D resourcesPath=samples/res

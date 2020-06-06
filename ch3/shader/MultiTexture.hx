@@ -1,5 +1,6 @@
 package ch3.shader;
 
+import h3d.mat.Texture;
 import hxsl.Shader;
 
 /**
@@ -7,6 +8,12 @@ import hxsl.Shader;
 **/
 class MultiTexture extends Shader
 {
+  
+  @:isVar public static var noTexture(get, null):Texture;
+  static function get_noTexture() {
+    if (noTexture == null) noTexture = Texture.fromColor(0xff0000);
+    return noTexture;
+  }
   
   static var SRC = {
     
@@ -48,6 +55,21 @@ class MultiTexture extends Shader
       else textureColor = t0;
     }
     
+  }
+  
+  public function new() {
+    super();
+    inline clearTextures();
+  }
+  
+  public function clearTextures() {
+    texture1 = noTexture;
+    texture2 = noTexture;
+    texture3 = noTexture;
+    texture4 = noTexture;
+    texture5 = noTexture;
+    texture6 = noTexture;
+    texture7 = noTexture;
   }
   
 }

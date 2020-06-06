@@ -13,24 +13,14 @@ import h2d.SpriteBatch;
 @:access(h2d.Tile)
 class SpriteBatchExt extends SpriteBatch
 {
-  @:allow(ch2.TileGroupExt)
-  static var noTexture:Texture;
   var textureShader:MultiTexture;
   var textureIndex:Array<TextureRef>;
   
   public function new(?parent:Object)
   {
     super(null, parent);
-    if (noTexture == null) noTexture = Texture.fromColor(0xff0000);
     textureShader = new MultiTexture();
     textureIndex = new Array();
-    textureShader.texture1 = noTexture;
-    textureShader.texture2 = noTexture;
-    textureShader.texture3 = noTexture;
-    textureShader.texture4 = noTexture;
-    textureShader.texture5 = noTexture;
-    textureShader.texture6 = noTexture;
-    textureShader.texture7 = noTexture;
     this.addShader(textureShader);
   }
   
@@ -73,13 +63,7 @@ class SpriteBatchExt extends SpriteBatch
   {
     super.clear();
     textureIndex = new Array();
-    textureShader.texture1 = noTexture;
-    textureShader.texture2 = noTexture;
-    textureShader.texture3 = noTexture;
-    textureShader.texture4 = noTexture;
-    textureShader.texture5 = noTexture;
-    textureShader.texture6 = noTexture;
-    textureShader.texture7 = noTexture;
+    textureShader.clearTextures();
     tile = null;
   }
   
@@ -106,13 +90,7 @@ class SpriteBatchExt extends SpriteBatch
   
   function repopulate()
   {
-    textureShader.texture1 = noTexture;
-    textureShader.texture2 = noTexture;
-    textureShader.texture3 = noTexture;
-    textureShader.texture4 = noTexture;
-    textureShader.texture5 = noTexture;
-    textureShader.texture6 = noTexture;
-    textureShader.texture7 = noTexture;
+    textureShader.clearTextures();
     if (textureIndex.length == 0)
     {
       tile = null;
