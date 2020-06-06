@@ -1,5 +1,6 @@
-package hxd;
+package cherry;
 
+import hxd.Pixels;
 import haxe.io.Input;
 import haxe.io.BytesInput;
 import haxe.io.Path;
