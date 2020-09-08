@@ -21,9 +21,9 @@ class RadioButton extends Checkbox
   **/
   public var index(default, null):Int;
   
-  public function new(?parent:Object, ?group:RadioGroup)
+  public function new(?parent:Object, ?group:RadioGroup, ?label:String)
   {
-    super(parent);
+    super(parent, label);
     if (bg == null)
     {
       var d:hxd.BitmapData = new hxd.BitmapData(10, 10);
