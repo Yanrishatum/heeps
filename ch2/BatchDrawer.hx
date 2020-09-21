@@ -1,11 +1,14 @@
 package ch2;
 
+import ch3.shader.MultiTexture2;
 import h2d.Object;
 import h3d.mat.Texture;
 import ch3.shader.MultiTexture;
 import h2d.RenderContext;
 import h2d.Drawable;
 import h2d.Tile;
+import ch2.impl.BatchDrawStateExt;
+import h2d.impl.BatchDrawState;
 
 @:access(h2d.Tile)
 private class BatchDrawerContent extends h3d.prim.Primitive {
@@ -17,10 +20,13 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
   public var yMin:Float;
   public var xMax:Float;
   public var yMax:Float;
+  
+  var state:BatchDrawStateExt;
 
   public var dirty:Bool;
 
   public function new() {
+    state = new BatchDrawStateExt();
     clear();
   }
 
@@ -29,6 +35,7 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
     if (buffer != null)
       buffer.dispose();
     buffer = null;
+    state.clear();
     xMin = hxd.Math.POSITIVE_INFINITY;
     yMin = hxd.Math.POSITIVE_INFINITY;
     xMax = hxd.Math.NEGATIVE_INFINITY;
@@ -43,13 +50,22 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
     return if (buffer == null) Std.int(tmp.length / stride) >> 1 else buffer.totalVertices() >> 1;
   }
 
-  public inline function addColor(x:Float, y:Float, color:h3d.Vector, t:Tile, index:Int) {
-    add(x, y, color.r, color.g, color.b, color.a, t, index);
+  public inline function addColor(x:Float, y:Float, color:h3d.Vector, t:Tile) {
+    add(x, y, color.r, color.g, color.b, color.a, t);
   }
 
-  public function add(x:Float, y:Float, r:Float, g:Float, b:Float, a:Float, t:Tile, index:Int) {
+  inline function getIndex(t:Tile) {
+    return state.setTile(t);
+    // state.setTile(t);
+    // return 0;
+  }
+
+  public function add(x:Float, y:Float, r:Float, g:Float, b:Float, a:Float, t:Tile) {
     var sx = x + t.dx;
     var sy = y + t.dy;
+    var index = getIndex(t);
+    state.add(4);
+    
     inline function color() {
       tmp.push(r);
       tmp.push(g);
@@ -93,10 +109,13 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
     dirty = true;
   }
 
-  public function addTransform(x:Float, y:Float, sx:Float, sy:Float, r:Float, c:h3d.Vector, t:Tile, index:Int) {
+  public function addTransform(x:Float, y:Float, sx:Float, sy:Float, r:Float, c:h3d.Vector, t:Tile) {
     var ca = Math.cos(r), sa = Math.sin(r);
     var hx = t.width, hy = t.height;
 
+    var index = getIndex(t);
+    state.add(4);
+    
     inline function color() {
       tmp.push(c.r);
       tmp.push(c.g);
@@ -163,6 +182,24 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
     dirty = true;
   }
 
+  public function recalcBounds() {
+    xMin = hxd.Math.POSITIVE_INFINITY;
+    yMin = hxd.Math.POSITIVE_INFINITY;
+    xMax = hxd.Math.NEGATIVE_INFINITY;
+    yMax = hxd.Math.NEGATIVE_INFINITY;
+    var i = 0;
+    final len = tmp.length;
+    while (i < len) {
+      var v = tmp[i];
+      if (xMin > v) xMin = v;
+      if (xMax < v) xMax = v;
+      v = tmp[i];
+      if (yMin > v) yMin = v;
+      if (yMax < v) yMax = v;
+      i += stride;
+    }
+  }
+
   public function addPoint(x:Float, y:Float, u:Float, v:Float, color:Int, index:Int) {
     tmp.push(x);
     tmp.push(y);
@@ -177,6 +214,8 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
       xMax = x;
     if (y > yMax)
       yMax = y;
+    
+    state.add(1);
   }
 
   inline function insertColor(c:Int, index:Int) {
@@ -209,10 +248,11 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
     }
   }
 
-  public function doRender(engine:h3d.Engine, min, len) {
+  public function doRender(ctx:RenderContext, shader, min, len) {
     flush();
     if (buffer != null)
-      engine.renderQuadBuffer(buffer, min, len);
+      state.drawQuads(ctx, shader, buffer, min, len);
+      // state.drawQuads(ctx, buffer, min, len);
   }
 }
 
@@ -222,20 +262,22 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
 class BatchDrawer extends Drawable {
   
   var content:BatchDrawerContent;
-  var textureShader:MultiTexture;
-  var states:Array<BatchState>;
+  var shader:MultiTexture2;
   var stateCount:Int = 0;
   var curColor : h3d.Vector;
-  var counter:Int;
+  public var counter(default, null):Int;
   
   public function new(?parent) {
     super(parent);
+    shader = new MultiTexture2();
     this.content = new BatchDrawerContent();
-    this.states = [new BatchState(this, 0)];
-    textureShader = new MultiTexture();
-    this.addShader(textureShader);
+    addShader(shader);
     stateCount = 0;
     curColor = new h3d.Vector(1, 1, 1, 1);
+  }
+  
+  public inline function invalidateBounds() {
+    content.recalcBounds();
   }
   
   override function getBoundsRec( relativeTo : Object, out : h2d.col.Bounds, forSize : Bool ) {
@@ -245,12 +287,21 @@ class BatchDrawer extends Drawable {
   
   public function clear() {
     stateCount = 0;
-    for (s in states) s.reset();
+    content.clear();
   }
   
   override function onRemove() {
     content.dispose();
     super.onRemove();
+  }
+  
+  public inline function getStride() {
+    return BatchDrawerContent.stride;
+  }
+  
+  public inline function getBuffer(forEdit:Bool = true) {
+    if (forEdit) content.dirty = true;
+    return content.tmp;
   }
   
   public function setDefaultColor( rgb : Int, alpha = 1.0 ) {
@@ -261,32 +312,32 @@ class BatchDrawer extends Drawable {
   }
   
   public inline function add(x : Float, y : Float, t : h2d.Tile):Int {
-    content.add(x, y, curColor.x, curColor.y, curColor.z, curColor.w, t, addRef(t));
+    content.add(x, y, curColor.x, curColor.y, curColor.z, curColor.w, t);
     return counter++;
   }
 
   public inline function addColor( x : Float, y : Float, r : Float, g : Float, b : Float, a : Float, t : Tile):Int {
-    content.add(x, y, r, g, b, a, t, addRef(t));
+    content.add(x, y, r, g, b, a, t);
     return counter++;
   }
 
   public inline function addAlpha(x : Float, y : Float, a : Float, t : h2d.Tile):Int {
-    content.add(x, y, curColor.x, curColor.y, curColor.z, a, t, addRef(t));
+    content.add(x, y, curColor.x, curColor.y, curColor.z, a, t);
     return counter++;
   }
 
   public inline function addTransform(x : Float, y : Float, sx : Float, sy : Float, r : Float, t : Tile):Int {
-    content.addTransform(x, y, sx, sy, r, curColor, t, addRef(t));
+    content.addTransform(x, y, sx, sy, r, curColor, t);
     return counter++;
   }
   
   public function setPos(index:Int, x:Float, y:Float) {
     if (index < 0 || index >= counter) return;
     final stride = BatchDrawerContent.stride;
-    var offset = index * stride;
+    var offset = index * stride * 4;
     var tmp = content.tmp;
     var dx = x - tmp[offset];
-    var dy = y - tmp[offset];
+    var dy = y - tmp[offset + 1];
     tmp[offset                 ] += dx;
     tmp[offset              + 1] += dy;
     tmp[offset + stride        ] += dx;
@@ -301,7 +352,7 @@ class BatchDrawer extends Drawable {
   public function setUV(index:Int, u0:Float, v0:Float, u1:Float, v1:Float) {
     if (index < 0 || index >= counter) return;
     final stride = BatchDrawerContent.stride;
-    var offset = index * stride + 2;
+    var offset = index * stride * 4 + 2;
     var tmp = content.tmp;
     tmp[offset                 ] = u0;
     tmp[offset              + 1] = v0;
@@ -317,10 +368,10 @@ class BatchDrawer extends Drawable {
   public function setPosUV(index:Int, x:Float, y:Float, u0:Float, v0:Float, u1:Float, v1:Float) {
     if (index < 0 || index >= counter) return;
     final stride = BatchDrawerContent.stride;
-    var offset = index * stride;
+    var offset = index * stride * 4;
     var tmp = content.tmp;
     var dx = x - tmp[offset];
-    var dy = y - tmp[offset];
+    var dy = y - tmp[offset + 1];
     tmp[offset                 ] += dx;
     tmp[offset              + 1] += dy;
     tmp[offset              + 2]  = u0;
@@ -343,7 +394,7 @@ class BatchDrawer extends Drawable {
   public function setColor(index:Int, r:Float, g:Float, b:Float, a:Float) {
     if (index < 0 || index >= counter) return;
     final stride = BatchDrawerContent.stride;
-    var offset = index * stride + 4;
+    var offset = index * stride * 4 + 4;
     var tmp = content.tmp;
     inline function setCol(o) {
       tmp[offset + stride * o    ] = r;
@@ -358,114 +409,18 @@ class BatchDrawer extends Drawable {
     content.dirty = true;
   }
   
-  function addRef(t:Tile) {
-    if (stateCount == 0) {
-      stateCount++;
-      return states[0].add(t);
-    } else {
-      var idx = states[stateCount - 1].add(t);
-      if (idx == -1) {
-        var state:BatchState;
-        if (stateCount == states.length) {
-          states.push(state = new BatchState(this, counter));
-        } else {
-          state = states[stateCount];
-          state.start = counter;
-        }
-        state.add(t);
-        stateCount++;
-        return 0;
-      }
-      return idx;
-    }
+  public function drawWidth(obj:Drawable, shader:MultiTexture2, ctx:RenderContext) {
+    ctx.beginDrawBatchState(obj);
+    content.doRender(ctx, shader, 0, -1);
   }
   
   override function draw(ctx:RenderContext) {
-    for (i in 0...stateCount) {
-      states[i].draw(ctx, content);
-    }
+    ctx.beginDrawBatchState(this);
+    content.doRender(ctx, shader, 0, -1);
   }
 
   override function sync( ctx : RenderContext ) {
     super.sync(ctx);
     content.flush();
   }
-}
-
-@:access(ch2.BatchDrawer)
-@:access(ch2.SpriteBatchExt)
-class BatchState {
-  var drawer:BatchDrawer;
-  
-  var textureIndex:Array<Texture>;
-  var texture:Texture;
-  var texture1:Texture;
-  var texture2:Texture;
-  var texture3:Texture;
-  var texture4:Texture;
-  var texture5:Texture;
-  var texture6:Texture;
-  var texture7:Texture;
-  var allocTextures = 0;
-  
-  public var start:Int;
-  public var count:Int;
-  
-  public function add(t:Tile):Int {
-    var tex = t.getTexture();
-    var idx = textureIndex.indexOf(tex);
-    if (idx == -1)
-    {
-      if (allocTextures == 8) return -1;
-      switch (allocTextures) {
-        case 0: texture = tex;
-        case 1: texture1 = tex;
-        case 2: texture2 = tex;
-        case 3: texture3 = tex;
-        case 4: texture4 = tex;
-        case 5: texture5 = tex;
-        case 6: texture6 = tex;
-        case 7: texture7 = tex;
-      }
-      allocTextures++;
-    }
-    count++;
-    return idx;
-  }
-  
-  public function new(drawer:BatchDrawer, offset:Int) {
-    this.drawer = drawer;
-    textureIndex = [];
-    reset();
-    this.start = offset;
-  }
-  
-  public function reset() {
-    start = 0;
-    count = 0;
-    textureIndex = [];
-    allocTextures = 0;
-    texture = MultiTexture.noTexture;
-    texture1 = MultiTexture.noTexture;
-    texture2 = MultiTexture.noTexture;
-    texture3 = MultiTexture.noTexture;
-    texture4 = MultiTexture.noTexture;
-    texture5 = MultiTexture.noTexture;
-    texture6 = MultiTexture.noTexture;
-    texture7 = MultiTexture.noTexture;
-  }
-  
-  public function draw(ctx:RenderContext, content:BatchDrawerContent) {
-    if (!ctx.beginDrawObject(drawer, texture)) return;
-    var shader = drawer.textureShader;
-    shader.texture1 = texture1;
-    shader.texture2 = texture2;
-    shader.texture3 = texture3;
-    shader.texture4 = texture4;
-    shader.texture5 = texture5;
-    shader.texture6 = texture6;
-    shader.texture7 = texture7;
-    content.doRender(ctx.engine, start*2, count*2);
-  }
-  
 }

@@ -6,7 +6,6 @@ import h2d.Drawable;
 import h2d.Tile;
 import ch3.shader.MultiTexture;
 import h3d.mat.Texture;
-import ch2.SpriteBatchExt.TextureRef;
 
 // TileLayerContent is private class, hence can't really utilize it.
 @:access(h2d.Tile)

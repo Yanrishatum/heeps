@@ -8,8 +8,13 @@ import ch3.shader.MultiTexture;
 import h2d.SpriteBatch;
 
 /**
+  Temporary deprecated: Core SpriteBatch now supports multiple textures
+**/
+typedef SpriteBatchExt = h2d.SpriteBatch;
+/**
   Experimental SpriteBatch with support of up to 8 different textures.
 **/
+/*
 @:access(h2d.Tile)
 class SpriteBatchExt extends SpriteBatch
 {
@@ -231,3 +236,4 @@ class TextureRef
   public var refCount:Int;
   
 }
+*/
