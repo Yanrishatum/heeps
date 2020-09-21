@@ -35,7 +35,7 @@ class CustomButton extends EventInteractive
     flags = None;
     state = Idle;
     this.views = views != null ? views : [];
-    for (v in views) {
+    for (v in this.views) {
       // if (Std.is(v, Object) && cast (v:Object) != this) {
       //   addChild(cast v);
       // }
@@ -111,6 +111,20 @@ class CustomButton extends EventInteractive
 interface IButtonStateView {
   
   function setState(state:ButtonState, flags:ButtonFlags):Void;
+  
+}
+
+class CallbackButtonState implements IButtonStateView {
+  
+  public function new(cb:(state:ButtonState, flags:ButtonFlags)->Void) {
+    this.onState = cb;
+  }
+  
+  public var onState:(state:ButtonState, flags:ButtonFlags)->Void;
+  
+  public function setState(state:ButtonState, flags:ButtonFlags):Void {
+    onState(state, flags);
+  }
   
 }
 
