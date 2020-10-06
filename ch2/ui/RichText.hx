@@ -1,9 +1,257 @@
 package ch2.ui;
 
+import h2d.impl.BatchDrawState;
+import h3d.prim.Primitive;
+import hxd.FloatBuffer;
 import ch2.ui.effects.RichTextEffect;
 import h3d.shader.SignedDistanceField;
 import h2d.col.Bounds;
 import h2d.Drawable;
+
+@:access(h2d.Tile)
+class RichTextContent extends Primitive {
+  
+  public static inline var STRIDE = 8; // Screw extra optimizations of BatchDrawer.
+  
+  public var renderer:RichTextRenderer;
+  public var base:FloatBuffer;
+  public var composed:FloatBuffer;
+  
+  var state:BatchDrawState;
+  public var vertices:Int;
+  public var tiles:Int;
+  var dirty:Bool;
+
+  public var xMin:Float;
+  public var yMin:Float;
+  public var xMax:Float;
+  public var yMax:Float;
+  
+  public function new() {
+    state = new BatchDrawState();
+    clear();
+  }
+  
+  public function isEmpty() {
+    return triCount() == 0;
+  }
+  
+  override public function triCount() {
+    return if (buffer == null) vertices >> 1 else buffer.totalVertices() >> 1;
+  }
+  
+  public function clear() {
+    base = new FloatBuffer();
+    composed = new FloatBuffer();
+    state.clear();
+    vertices = 0;
+    tiles = 0;
+    dirty = true;
+    if (buffer != null)
+      buffer.dispose();
+    buffer = null;
+  }
+  
+  
+  public function add(x:Float, y:Float, r:Float, g:Float, b:Float, a:Float, t:Tile) {
+    var sx = x + t.dx;
+    var sy = y + t.dy;
+    state.setTile(t);
+    state.add(4);
+    final tmp = base;
+    inline function color() {
+      tmp.push(r);
+      tmp.push(g);
+      tmp.push(b);
+      tmp.push(a);
+    }
+    tmp.push(sx);
+    tmp.push(sy);
+    tmp.push(t.u);
+    tmp.push(t.v);
+    color();
+    tmp.push(sx + t.width);
+    tmp.push(sy);
+    tmp.push(t.u2);
+    tmp.push(t.v);
+    color();
+    tmp.push(sx);
+    tmp.push(sy + t.height);
+    tmp.push(t.u);
+    tmp.push(t.v2);
+    color();
+    tmp.push(sx + t.width);
+    tmp.push(sy + t.height);
+    tmp.push(t.u2);
+    tmp.push(t.v2);
+    color();
+    
+    composed.grow(tmp.length);
+    
+    vertices += 4;
+    tiles++;
+    
+    dirty = true;
+  }
+  
+  public function setTilePosBase(index:Int, x:Float, y:Float) {
+    index = index * STRIDE * 4;
+    final tmp = base;
+    
+    var dx = x - tmp[index];
+    tmp[         index] += dx;
+    tmp[STRIDE  +index] += dx;
+    tmp[STRIDE*2+index] += dx;
+    tmp[STRIDE*3+index] += dx;
+    
+    index++;
+    var dy = y - tmp[index];
+    tmp[         index] += dy;
+    tmp[STRIDE  +index] += dy;
+    tmp[STRIDE*2+index] += dy;
+    tmp[STRIDE*3+index] += dy;
+    dirty = true;
+  }
+  
+  // Composite
+  
+  public function offsetXY(index:Int, x:Float, y:Float) {
+    index = index * STRIDE * 4;
+    final tmp = composed;
+    tmp[index] += x;
+    tmp[STRIDE+index] += x;
+    tmp[STRIDE*2+index] += x;
+    tmp[STRIDE*3+index] += x;
+    
+    index++;
+    tmp[index] += y;
+    tmp[STRIDE+index] += y;
+    tmp[STRIDE*2+index] += y;
+    tmp[STRIDE*3+index] += y;
+    dirty = true;
+  }
+  
+  public function mulAlpha(index:Int, a:Float) {
+    index = index * STRIDE * 4 + 7;
+    final tmp = composed;
+    tmp[index] *= a;
+    tmp[STRIDE+index] *= a;
+    tmp[STRIDE*2+index] *= a;
+    tmp[STRIDE*3+index] *= a;
+    dirty = true;
+  }
+  
+  // Render-time
+  
+  public function begin() {
+    var i = 0;
+    // Just fill with base and avoid post-compositing.
+    final dst = composed;
+    final len = dst.length;
+    while (i < len) {
+      dst[i++] = 0; // x
+      dst[i++] = 0; // y
+      dst[i++] = 0; // u
+      dst[i++] = 0; // v
+      dst[i++] = 1; // r
+      dst[i++] = 1; // g
+      dst[i++] = 1; // b
+      dst[i++] = 1; // a
+    }
+  }
+  
+  function doCompose() {
+    var i = 0;
+    final src = base;
+    final dst = composed;
+    final len = dst.length;
+    xMin = hxd.Math.POSITIVE_INFINITY;
+    yMin = hxd.Math.POSITIVE_INFINITY;
+    xMax = hxd.Math.NEGATIVE_INFINITY;
+    yMax = hxd.Math.NEGATIVE_INFINITY;
+    var tmp;
+    while (i < len) {
+      // xy
+      tmp = (dst[i    ] += src[i    ]);
+      if (tmp < xMin) xMin = tmp;
+      if (tmp > xMax) xMax = tmp;
+      tmp = (dst[i + 1] += src[i + 1]);
+      if (tmp < yMin) yMin = tmp;
+      if (tmp > yMax) yMax = tmp;
+      
+      // uv
+      dst[i + 2] += src[i + 2];
+      dst[i + 3] += src[i + 3];
+      
+      // rgba
+      dst[i + 4] *= src[i + 4];
+      dst[i + 5] *= src[i + 5];
+      dst[i + 6] *= src[i + 6];
+      dst[i + 7] *= src[i + 7];
+      i += STRIDE;
+    }
+  }
+  
+  override public function alloc(engine:h3d.Engine) {
+    if (base == null)
+      clear();
+    if (base.length > 0) {
+      doCompose();
+      buffer = h3d.Buffer.ofFloats(composed, STRIDE, [Quads, RawFormat]);
+      dirty = false;
+    }
+  }
+
+  public inline function flush() {
+    if (buffer == null || buffer.isDisposed())
+      alloc(h3d.Engine.getCurrent());
+    else if (dirty) {
+      if (buffer.vertices < vertices)
+        alloc(h3d.Engine.getCurrent());
+      else {
+        doCompose();
+        buffer.uploadVector(composed, 0, vertices);
+        dirty = false;
+      }
+    }
+  }
+  
+  public function doRender(ctx:RenderContext, min, len) {
+    flush();
+    if (buffer != null)
+      state.drawQuads(ctx, buffer, min, len);
+  }
+}
+
+class RichTextRenderer extends Drawable {
+  
+  public var content:RichTextContent;
+  
+  public function new(?parent) {
+    content = new RichTextContent();
+    content.renderer = this;
+    super(parent);
+  }
+  
+  override function onRemove()
+  {
+    content.dispose();
+    super.onRemove();
+  }
+  
+  override function draw(ctx:RenderContext)
+  {
+    ctx.beginDrawBatchState(this);
+    content.doRender(ctx, 0, -1);
+  }
+  
+  override function sync(ctx:RenderContext)
+  {
+    content.flush();
+    super.sync(ctx);
+  }
+  
+}
 
 class RichText extends Drawable {
   
@@ -25,8 +273,8 @@ class RichText extends Drawable {
   var breakBatchIndex:Int;
   
   var currentFormat:RichTextFormat;
-  var content:Array<BatchDrawer> = [];
-  var batch:BatchDrawer;
+  var content:Array<RichTextRenderer> = [];
+  var batch:RichTextRenderer;
   
   var calcXMin:Float;
   var calcYMin:Float;
@@ -58,6 +306,7 @@ class RichText extends Drawable {
     content = [];
     lastLine = null;
     currentFormat = null;
+    batch = null;
     needReFinalize = false;
     
     calcMaxWidth();
@@ -115,7 +364,7 @@ class RichText extends Drawable {
           var charset = fnt.charset;
           var yoff = ll.base - fnt.baseLine;
           var prev = -1;
-          var batch = n.batch;
+          var batch = n.batch.content;
           var idx = n.batchMin;
           for (i in n.min...n.max) {
             var code = text.charCodeAt(i);
@@ -130,12 +379,12 @@ class RichText extends Drawable {
               continue;
             }
             var kern = char.getKerningOffset(prev);
-            batch.setPos(idx++, x + char.getKerningOffset(prev) + char.t.dx, y + yoff + char.t.dy);
+            batch.setTilePosBase(idx++, x + char.getKerningOffset(prev) + char.t.dx, y + yoff + char.t.dy);
             prev = code;
             x += char.width + kern;
           }
         case NTile(t, advance, isBreak, format):
-          n.batch.setPos(n.batchMin, x + t.dx, y + ll.base - t.height + t.dy);
+          n.batch.content.setTilePosBase(n.batchMin, x + t.dx, y + ll.base - t.height + t.dy);
           x += n.width;
         case NObject(o, advance, isBreak, format):
           var size = o.getSize(bounds);
@@ -149,7 +398,7 @@ class RichText extends Drawable {
     for (n in ll.nodes) {
       if (n.batchMin != n.batchMax) {
         for (e in n.format.effects) {
-          e.init(n.batch, n.batchMin, n.batchMax, n);
+          e.init(n.batch.content, n.batchMin, n.batchMax, n);
         }
       }
     }
@@ -275,7 +524,7 @@ class RichText extends Drawable {
   }
   
   function splitBatcher(format:RichTextFormat) {
-    var b = new BatchDrawer(this);
+    var b = new RichTextRenderer(this);
     currentFormat = format;
     content.push(b);
     batch = b;
@@ -325,18 +574,18 @@ class RichText extends Drawable {
     var start = 0;
     var breakPos = -1;
     var breakChar:Int = 0;
-    var lastBatchInsert = batch.counter;
-    var breakCounter:Int = batch.counter;
+    var lastBatchInsert = batch.content.tiles;
+    var breakCounter:Int = batch.content.tiles;
     var i = 0;
     var node = NText(text, format);
     nodes.push(node);
     while (i < len) {
       var code = text.charCodeAt(i);
       if (code == '\n'.code) {
-        ll.add(start, i, lastBatchInsert, batch.counter, x + size - ll.width, batch, format, node);
+        ll.add(start, i, lastBatchInsert, batch.content.tiles, x + size - ll.width, batch, format, node);
         ll = newLine();
         ll.align = align;
-        lastBatchInsert = batch.counter;
+        lastBatchInsert = batch.content.tiles;
         size = 0;
         x = 0;
         start = i + 1;
@@ -359,7 +608,7 @@ class RichText extends Drawable {
         if (isBreak) {
           breakPos = i;
           breakChar = code;
-          breakCounter = batch.counter;
+          breakCounter = batch.content.tiles;
           x += size;
           size = 0;
         }
@@ -388,7 +637,7 @@ class RichText extends Drawable {
       size += chw;
       i++;
       if (!charset.isSpace(code)) {
-        batch.addColor(0, 0, r, g, b, a, char.t);
+        batch.content.add(0, 0, r, g, b, a, char.t);
       }
       prev = code;
     }
@@ -396,10 +645,10 @@ class RichText extends Drawable {
       breakNodeIndex = ll.nodes.length;
       breakIndex = breakPos;
       breakWidth = x;
-      breakBatchIndex = batch.counter;
+      breakBatchIndex = batch.content.tiles;
     }
     if (start != i) {
-      ll.add(start, i, lastBatchInsert, batch.counter, x + size - ll.width, batch, format, node);
+      ll.add(start, i, lastBatchInsert, batch.content.tiles, x + size - ll.width, batch, format, node);
     }
   }
   
@@ -430,8 +679,8 @@ class RichText extends Drawable {
     }
     var node = NTile(t, advance, isBreak, format);
     nodes.push(node);
-    ll.add(0, 1, batch.counter, batch.counter + 1, advance, batch, format, node);
-    batch.add(0, 0, t); // Positioned later
+    ll.add(0, 1, batch.content.tiles, batch.content.tiles + 1, advance, batch, format, node);
+    batch.content.add(0, 0, 1, 1, 1, 1, t); // Positioned later
   }
   
   public function addObject(o:Object, ?advance:Float, ?isBreak:BreakRule, ?format:RichTextFormat) {
@@ -490,19 +739,27 @@ class RichText extends Drawable {
     if (needReFinalize) {
       var old = nodes;
       clear();
-      for (n in nodes) addNode(n);
+      for (n in old) addNode(n);
     }
     ensureFinalized();
+    // TODO: Optimize and store effects in a separate array.
+    for (c in content) {
+      c.content.begin();
+    }
     for (l in lines) {
       for (n in l.nodes) {
         for (e in n.format.effects) {
           if (e.frame != ctx.frame) {
             e.frame = ctx.frame;
-            e.begin(batch, ctx);
+            e.begin(ctx);
           }
-          e.sync(batch, ctx, n.batchMin, n.batchMax, n);
+          e.sync(batch.content, ctx, n.batchMin, n.batchMax, n);
         }
       }
+    }
+    for (l in lines) for (n in l.nodes) for (e in n.format.effects) if (e.endFrame != ctx.frame) {
+      e.endFrame = ctx.frame;
+      e.end(ctx);
     }
     super.sync(ctx);
   }
@@ -672,7 +929,7 @@ class TextLine {
   
   public function new() {}
   
-  public inline function add(min:Int, max:Int, bmin:Int, bmax:Int, width:Float, batch:BatchDrawer, format:RichTextFormat, node:RichTextNode) {
+  public inline function add(min:Int, max:Int, bmin:Int, bmax:Int, width:Float, batch:RichTextRenderer, format:RichTextFormat, node:RichTextNode) {
     nodes.push({ min: min, max: max, batchMin: bmin, batchMax: bmax, width: width, format: format, node: node, batch: batch });
     this.width += width;
     finalized = false;
@@ -686,7 +943,7 @@ typedef NodeRange = {
   var batchMin:Int;
   var batchMax:Int;
   var width:Float;
-  var batch:BatchDrawer;
+  var batch:RichTextRenderer;
   
   var format:RichTextFormat;
   var node:RichTextNode;

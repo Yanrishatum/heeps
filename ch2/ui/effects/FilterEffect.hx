@@ -11,12 +11,7 @@ class FilterEffect<T:h2d.filter.Filter> extends RichTextEffect {
     this.filter = filter;
   }
   
-  override public function init(content:BatchDrawer, start:Int, end:Int, node:NodeRange)
-  {
-    content.invalidateBounds();
-  }
-  
-  override public function attach(content:BatchDrawer)
+  override public function attach(content:RichTextRenderer)
   {
     content.filter = filter;
   }
