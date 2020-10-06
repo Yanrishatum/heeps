@@ -55,6 +55,7 @@ class Helper {
       hxd.res.Config.extensions.set("tmx", "cherry.res.TiledMapFile");
     }
   }
+  #end
   
   public static macro function getContent(file:String):ExprOf<String> {
     // trace(haxe.macro.Context.getLocalModule());
@@ -68,5 +69,4 @@ class Helper {
       return macro "";
     }
   }
-  #end
 }
