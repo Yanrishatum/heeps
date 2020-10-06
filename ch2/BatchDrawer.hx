@@ -295,6 +295,8 @@ class BatchDrawer extends Drawable {
     super.onRemove();
   }
   
+  public static inline function getContentStride() return BatchDrawerContent.stride;
+  
   public inline function getStride() {
     return BatchDrawerContent.stride;
   }
@@ -407,6 +409,21 @@ class BatchDrawer extends Drawable {
     setCol(2);
     setCol(3);
     content.dirty = true;
+  }
+  
+  public inline function setAlpha(index:Int, a:Float) {
+    if (index < 0 || index >= counter) return;
+    setIndexValue(index, a, 7);
+    content.dirty = true;
+  }
+  
+  function setIndexValue(index:Int, val:Float, offset:Int) {
+    final offset = index * BatchDrawerContent.stride * 4 + offset;
+    final tmp = content.tmp;
+    tmp[offset             ] = val;
+    tmp[offset + BatchDrawerContent.stride    ] = val;
+    tmp[offset + BatchDrawerContent.stride * 2] = val;
+    tmp[offset + BatchDrawerContent.stride * 3] = val;
   }
   
   public function drawWidth(obj:Drawable, shader:MultiTexture2, ctx:RenderContext) {
