@@ -50,7 +50,7 @@ class Helper {
     // trace(hxd.res.Config.pairedExtensions);
     
     
-    if (Context.definedValue("format-tiled") >= "2.0.0")
+    if (Context.definedValue("format-tiled") >= "2.0.0" || Context.defined("tiledhx"))
     {
       hxd.res.Config.extensions.set("tmx", "cherry.res.TiledMapFile");
     }

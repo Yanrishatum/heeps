@@ -3,8 +3,15 @@ package cherry.res;
 import hxd.res.Resource;
 import haxe.io.Path;
 import h2d.Tile;
-#if (format_tiled >= "2.0.0")
+#if (format_tiled >= "2.0.0" || tiledhx)
 
+#if tiledhx
+import tiled.types.TmxMap;
+import tiled.types.TmxTileset;
+import tiled.types.TmxObject;
+import tiled.Tiled;
+using tiled.TiledTools;
+#else
 import format.tmx.Data;
 import format.tmx.Reader;
 using format.tmx.Tools;
@@ -23,9 +30,7 @@ class TiledMapData {
     while (i < l)
     {
       if (tilesets[i+1].tileset.firstGID > gid)
-      {
         return tilesets[i];
-      }
       i++;
     }
     return tilesets[l];
@@ -39,9 +44,7 @@ class TiledMapData {
     while (i < l)
     {
       if (tilesets[i+1].tileset.firstGID > gid)
-      {
         return tilesets[i].tileByGid(gid);
-      }
       i++;
     }
     return tilesets[l].tileByGid(gid);
@@ -64,15 +67,42 @@ class TiledMapTileset {
   
 }
 
+#end
+
 class TiledMapFile extends Resource {
 
+  #if tiledhx
+  /**
+    The loader used to parse TMX maps, load dependencies and store object types in.
+  **/
+  public static var loader(get, set):Tiled;
+  
+  static var _loader:Tiled;
+  static inline function get_loader() {
+    if (_loader == null) return _loader = new Tiled();
+    return _loader;
+  }
+  static inline function set_loader(v):Tiled {
+    return _loader = v;
+  }
+  
+  /**
+    Parses TMX file.
+    Use TiledMapFile.loader to set the loader configuration and fill object types.
+  **/
+  public inline function toMap():TmxMap {
+    return loader.loadTMXResource(this);
+  }
+  
+  #else
+  
   var reader : Reader;
   #if !disable_tsx_cache
   static var tsxCache:Map<String, TmxTileset> = [];
   static var tilesetCache:Map<String, Array<h2d.Tile>> = [];
   #end
   
-    /**
+  /**
     Parses TMX file and optionally resolves TSX references and loads tileset images. objectTypes can be provided to add their properties to objects.
   **/
   public function toMap(resolveTsx = true, loadTilesets = true, ?objectTypes:Map<String, TmxObjectTypeTemplate>) : TiledMapData {
@@ -162,7 +192,7 @@ class TiledMapFile extends Resource {
     }
     throw "Could not find Tsx at path '" + path + "' relative to '" + entry.directory + "'!";
   }
-
+  #end
 }
 
 #end
