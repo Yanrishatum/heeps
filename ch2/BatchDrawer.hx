@@ -367,6 +367,10 @@ class BatchDrawer extends Drawable {
     content.dirty = true;
   }
   
+  public inline function setTileUV(index:Int, tile:Tile) {
+    @:privateAccess setUV(index, tile.u, tile.v, tile.u2, tile.v2);
+  }
+  
   public function setPosUV(index:Int, x:Float, y:Float, u0:Float, v0:Float, u1:Float, v1:Float) {
     if (index < 0 || index >= counter) return;
     final stride = BatchDrawerContent.stride;
@@ -391,6 +395,10 @@ class BatchDrawer extends Drawable {
     tmp[offset + stride * 3 + 2]  = u1;
     tmp[offset + stride * 3 + 3]  = v1;
     content.dirty = true;
+  }
+  
+  public function setPosTileUV(index, x:Float, y:Float, tile:Tile) {
+    @:privateAccess setPosUV(index, x, y, tile.u, tile.v, tile.u2, tile.v2);
   }
   
   public function setColor(index:Int, r:Float, g:Float, b:Float, a:Float) {
