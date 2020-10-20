@@ -360,9 +360,9 @@ class BatchDrawer extends Drawable {
     tmp[offset              + 1] = v0;
     tmp[offset + stride        ] = u1;
     tmp[offset + stride     + 1] = v0;
-    tmp[offset + stride * 2    ] = u1;
+    tmp[offset + stride * 2    ] = u0;
     tmp[offset + stride * 2 + 1] = v1;
-    tmp[offset + stride * 3    ] = u0;
+    tmp[offset + stride * 3    ] = u1;
     tmp[offset + stride * 3 + 1] = v1;
     content.dirty = true;
   }
@@ -384,11 +384,11 @@ class BatchDrawer extends Drawable {
     tmp[offset + stride     + 3]  = v0;
     tmp[offset + stride * 2    ] += dx;
     tmp[offset + stride * 2 + 1] += dy;
-    tmp[offset + stride * 2 + 2]  = u1;
+    tmp[offset + stride * 2 + 2]  = u0;
     tmp[offset + stride * 2 + 3]  = v1;
     tmp[offset + stride * 3    ] += dx;
     tmp[offset + stride * 3 + 1] += dy;
-    tmp[offset + stride * 3 + 2]  = u0;
+    tmp[offset + stride * 3 + 2]  = u1;
     tmp[offset + stride * 3 + 3]  = v1;
     content.dirty = true;
   }
