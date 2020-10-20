@@ -14,6 +14,8 @@ class DevOverlay extends Object {
   var labelCount:Int;
   var labelPool:Int;
   
+  public var manualClear:Bool;
+  
   public function new(?parent:Object)
   {
     super(parent);
@@ -54,13 +56,31 @@ class DevOverlay extends Object {
     g.lineStyle();
   }
   
+  public inline function ray(x:Float, y:Float, nx:Float, ny:Float, color:Int, length = 10., width = 1., alpha = 1.) {
+    line(x, y, x + nx * length, y + ny * length, color, width, alpha);
+  }
+  
+  public inline function rayAngle(x:Float, y:Float, angle:Float, color:Int, length = 10., width = 1., alpha = 1.) {
+    ray(x, y, Math.cos(angle), Math.sin(angle), color, length, width, alpha);
+  }
+  
+  public function cross(x:Float, y:Float, color:Int, radius:Int = 4, width = 1., alpha = 1.) {
+    g.lineStyle(width, color, alpha);
+    g.moveTo(x - radius, y);
+    g.lineTo(x + radius, y);
+    g.moveTo(x, y - radius);
+    g.lineTo(x, y + radius);
+    g.lineStyle();
+  }
+  
   override function drawRec(ctx:RenderContext)
   {
     super.drawRec(ctx);
-    while (labelCount > 0)
-    {
-      labels[--labelCount].visible = false;
-    }
+    if (!manualClear) inline clear();
+  }
+  
+  public function clear() {
+    while (labelCount > 0) labels[--labelCount].visible = false;
     g.clear();
   }
   
