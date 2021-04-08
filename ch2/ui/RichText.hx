@@ -1,5 +1,6 @@
 package ch2.ui;
 
+import h2d.HtmlText;
 import h2d.impl.BatchDrawState;
 import h3d.prim.Primitive;
 import hxd.FloatBuffer;
@@ -254,6 +255,133 @@ class RichTextRenderer extends Drawable {
 }
 
 class RichText extends Drawable {
+  
+  
+  public static dynamic function getFont(name:String, format:RichTextFormat):Font {
+    return HtmlText.defaultLoadFont(name);
+  }
+  
+  public static dynamic function getImage(url:String, format:RichTextFormat, element:Xml):Tile {
+    return HtmlText.defaultLoadImage(url);
+  }
+  
+  public static dynamic function getObject(url:String, format:RichTextFormat, element:Xml):Object {
+    return null;
+  }
+  
+  public static dynamic function getFormat(name:String, parent:RichTextFormat, element:Xml):RichTextFormat {
+    return parent;
+  }
+  
+  // public static dynamic function getEffect(name:String, format:RichTextFormat, element:Xml):RichTextEffect {
+  //   return null;
+  // }
+
+  public static function parseXML(x:Xml, ?defaultFormat:RichTextFormat):Array<RichTextNode> {
+    var result = [];
+    if (defaultFormat == null) defaultFormat = new RichTextFormat(hxd.res.DefaultFont.get(), 0xffffff, 1, Left);
+    parseXmlRec(x, defaultFormat, result);
+    return result;
+  }
+  
+  static function parseXmlRec(x:Xml, f:RichTextFormat, out:Array<RichTextNode>) {
+    switch (x.nodeType) {
+      case CData, PCData:
+        out.push(NText(x.nodeValue, f));
+      case Document, Element:
+        var name = x.nodeName.toLowerCase();
+        var rf:RichTextFormat = f;
+        inline function parentFormat() {
+          if (rf == f) rf = new RichTextFormat(f);
+        }
+        var breakRule = BNone;
+        var spacing:Float = 0;
+        for (att in x.attributes()) {
+          switch (att) {
+            case "font", "face":
+              parentFormat();
+              rf.font = getFont(x.get(att), rf);
+            case "align":
+              parentFormat();
+              switch (x.get(att)) {
+                case "left": rf.align = Left;
+                case "right": rf.align = Right;
+                case "center": rf.align = Center;
+                case other: "Unsupported alignment type: " + other;
+              }
+            case "color":
+              parentFormat();
+              var val = x.get(att);
+              var col:Int;
+              if (val.charCodeAt(0) == "#".code) {
+                if (val.length == 4) {
+                  // TODO: #RGB
+                  col = Std.parseInt("0x" + val.charAt(1) + val.charAt(1) + val.charAt(2) + val.charAt(2) + val.charAt(3) + val.charAt(3));
+                } else {
+                  col = Std.parseInt("0x" + val.substr(1));
+                }
+              } else {
+                col = Std.parseInt(val);
+              }
+              rf.color = Std.parseInt(val);
+            case "alpha", "opacity":
+              parentFormat();
+              var val = x.get(att);
+              if (val.indexOf("%") != -1) rf.alpha = Std.parseFloat(val) / 100;
+              else rf.alpha = Std.parseFloat(val);
+            case "format":
+              rf = getFormat(x.get(att), f, x);
+            // TODO: Effects
+            case "break":
+              switch (x.get(att)) {
+                case "none": breakRule = BNone;
+                case "left": breakRule = BLeft;
+                case "right": breakRule = BRight;
+                case "both": breakRule = BBoth;
+              }
+            case "spacing":
+              spacing = Std.parseFloat(x.get(att));
+          }
+        }
+        switch (name) {
+          case "p", "div":
+            var last = out[out.length - 1];
+            // TODO: smarter lb
+            if (last != NLineBreak) out.push(NLineBreak);
+          case "br": out.push(NLineBreak);
+          case "b", "bold":
+            parentFormat();
+            rf.font = getFont("bold", rf);
+          case "i", "italic":
+            parentFormat();
+            rf.font = getFont("italic", rf);
+          // case "a": // todo
+          case "object":
+            var url = x.exists("src") ? x.get("src") : x.get("href");
+            if (url != null) {
+              var obj = getObject(url, rf, x);
+              if (obj != null) {
+                out.push(NObject(obj, (x.exists("advance") ? Std.parseFloat(x.get("advance")) : obj.getSize().width) + spacing, breakRule, rf));
+              }
+            }
+          case "img", "tile":
+            var url = x.exists("src") ? x.get("src") : x.get("href");
+            if (url != null) {
+              var obj = getImage(url, rf, x);
+              if (obj != null) {
+                out.push(NTile(obj, (x.exists("advance") ? Std.parseFloat(x.get("advance")) : obj.width) + spacing, breakRule, rf));
+              }
+            }
+        }
+        for (e in x) parseXmlRec(e, rf, out);
+        switch (name) {
+          case "p", "div":
+            var last = out[out.length - 1];
+            if (last != NLineBreak) out.push(NLineBreak);
+        }
+      default: // ignore
+    }
+  }
   
   public var defaultFormat(default, set):RichTextFormat;
   
@@ -543,6 +671,14 @@ class RichText extends Drawable {
     for (e in format.effects) e.attach(b);
   }
   
+  public inline function addXmlText(text:String, ?format:RichTextFormat) {
+    addNodes(parseXML(Xml.parse(text), format));
+  }
+  
+  public inline function addXml(x:Xml, ?format:RichTextFormat) {
+    addNodes(parseXML(x, format));
+  }
+  
   public function addText(text:String, ?format:RichTextFormat) {
     if (lastLine == null) newLine();
     if (format == null) format = defaultFormat;
@@ -732,6 +868,10 @@ class RichText extends Drawable {
       case NLineBreak:
         addLineBreak();
     }
+  }
+  
+  public inline function addNodes(nodes:Array<RichTextNode>) {
+    for (n in nodes) addNode(n);
   }
   
   override function sync(ctx:RenderContext)
