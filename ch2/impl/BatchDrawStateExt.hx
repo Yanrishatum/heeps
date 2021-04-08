@@ -222,7 +222,14 @@ private class StateEntry {
   public function fill(shader:MultiTexture2) {
     // shader.TEXTURE_COUNT = textures.length;
     // shader.textures = textures;
-		for (i in 0...textures.length) shader.textures[i] = textures[i];
+		var filter = texture.filter;
+		var wrap = texture.wrap;
+		for (i in 0...textures.length) {
+			var tex = textures[i];
+			tex.filter = filter;
+			tex.wrap = wrap;
+			shader.textures[i] = tex;
+		}
   }
 
 }
