@@ -1,5 +1,6 @@
 package cherry.res;
 
+import haxe.io.BytesInput;
 import hxd.res.Image;
 import h2d.Object;
 import haxe.io.Path;
@@ -9,14 +10,16 @@ import hxd.res.Resource;
 /**
   A .gif image resource.
 **/
-class GifImage extends Resource {
+class GifImage extends Image {
   
   /**
     Returns Image resource of gif spritesheet.
   **/
   public function toImage():Image
   {
-    return hxd.res.Loader.currentInstance.load(Path.withExtension(".tmp/" + entry.path, "png")).toImage();
+    if (entry.getSign() == 0x46464947)
+      return hxd.res.Loader.currentInstance.load(Path.withExtension(".tmp/" + entry.path, "png")).toImage();
+    return this;
   }
   
   /**
@@ -24,13 +27,29 @@ class GifImage extends Resource {
   **/
   public function toFrames():Array<AnimationFrame>
   {
-    var rd = new haxe.io.BytesInput(entry.getBytes());
-    if (rd.readString(4) != "GIFF") throw "Invalid header!";
+    var sign = entry.getSign();
+    var rd:BytesInput = new BytesInput(entry.getBytes());
+    if (sign == 0x474E5089) {
+      rd.position += 8; // PNG header
+      rd.bigEndian = true;
+      // Skip until we're in GIFF chunk data
+      var len = rd.readInt32();
+      while (rd.readInt32() != 0x47494646) {
+        rd.position += len + 4;
+        len = rd.readInt32();
+      }
+      rd.bigEndian = false;
+    } else if (sign == 0x46464947) {
+      rd.position += 4; // header
+    } else {
+      throw "Invalid header!";
+    }
     rd.position += 2; // version
     var frames = rd.readUInt16();
     var width = rd.readInt32();
     var height = rd.readInt32();
-    var img = hxd.res.Loader.currentInstance.load(Path.withExtension(".tmp/" + entry.path, "png")).toTexture();
+    var img = toImage().toTexture();
+    // var img = hxd.res.Loader.currentInstance.load(Path.withExtension(".tmp/" + entry.path, "png")).toTexture();
     
     var list:Array<AnimationFrame> = new Array();
     while (frames > 0)

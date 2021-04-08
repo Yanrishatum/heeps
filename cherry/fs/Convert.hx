@@ -26,7 +26,6 @@ class GifConvert extends Convert {
     
     var image = haxe.io.Bytes.alloc(frameSize * fc);
     var output = new haxe.io.BytesOutput();
-    output.writeString("GIFF");
     output.writeUInt16(0);
     output.writeUInt16(fc);
     output.writeInt32(w);
@@ -44,10 +43,13 @@ class GifConvert extends Convert {
       image.blit(frameSize * (i+1) - ls, frame, frame.length - ls, ls);
       #end
     }
+    var png = format.png.Tools.build32BGRA(w, mh * fc, image);
+    png.remove(CEnd);
+    png.add(CUnknown("GIFF", output.getBytes()));
+    png.add(CEnd);
     
     var imageOut = new haxe.io.BytesOutput();
-    new format.png.Writer(imageOut).write(format.png.Tools.build32BGRA(w, mh * fc, image));
-    hxd.File.saveBytes(haxe.io.Path.withExtension(dstPath, "png"), imageOut.getBytes());
-    save(output.getBytes());
+    new format.png.Writer(imageOut).write(png);
+    save(imageOut.getBytes());
   }
 }
