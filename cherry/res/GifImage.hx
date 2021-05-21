@@ -69,10 +69,12 @@ class GifImage extends Image {
   }
   
   static var _ = hxd.fs.Convert.register(new cherry.fs.Convert.GifConvert());
+  #if (sys || nodejs || macro)
   static var __ = hxd.fs.FileConverter.addConfig({
     "fs.convert": {
       "gif": "giff"
     }
   });
+  #end
   
 }

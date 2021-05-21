@@ -78,8 +78,10 @@ class Music {
     if (fade) channel.fadeTo(1, FADE_TIME);
     channel.onEnd = function() {
       if (current == oldSong && channel == chn) {
-        old.pause = false;
-        if (fade) old.fadeTo(1, FADE_TIME);
+        if (old != null) {
+          old.pause = false;
+          if (fade) old.fadeTo(1, FADE_TIME);
+        }
         channel = old;
       }
     }

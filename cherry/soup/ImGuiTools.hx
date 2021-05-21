@@ -11,7 +11,6 @@ using haxe.macro.Tools;
 #else
 import imgui.ImGui;
 import hl.NativeArray;
-#end
 
 private class ImVec2Impl {
   public var x:Single;
@@ -47,6 +46,7 @@ private class ImVec4Impl {
 }
 
 typedef IG = ImGuiTools;
+#end
 
 class ImGuiTools {
   
@@ -65,7 +65,7 @@ class ImGuiTools {
         case ECall(e, params):
           repl(e);
           for (p in params) repl(p);
-        case EConst(Constant.CIdent("_")):
+        case EConst(Constant.CIdent("_")), EConst(Constant.CIdent("__")):
           e.expr = EConst(CIdent(tmps.shift()));
         case EField(e, field):
           repl(e);
@@ -123,13 +123,24 @@ class ImGuiTools {
     return v;
   }
   
-  static var _arrSingle4:NativeArray<Single> = new NativeArray(4);
-  static var _arrSingle3:NativeArray<Single> = new NativeArray(3);
-  static var _arrSingle2:NativeArray<Single> = new NativeArray(2);
-  static var _arrSingle1:NativeArray<Single> = new NativeArray(1);
+  public static var arrSingle4:NativeArray<Single> = new NativeArray(4);
+  public static var arrSingle3:NativeArray<Single> = new NativeArray(3);
+  public static var arrSingle2:NativeArray<Single> = new NativeArray(2);
+  public static var arrSingle1:NativeArray<Single> = new NativeArray(1);
+  public static var arrInt1:NativeArray<Int> = new NativeArray(1);
+  public static var arrInt2:NativeArray<Int> = new NativeArray(2);
+  public static var arrInt3:NativeArray<Int> = new NativeArray(3);
+  public static var arrInt4:NativeArray<Int> = new NativeArray(4);
+  
+  public static function sliderInt(label:String, val:Int, v_min:Int, v_max:Int, format = "%d"):Int {
+    var vv = arrInt1;
+    vv[0]=val;
+    ImGui.sliderInt(label, vv, v_min, v_max, format);
+    return vv[0];
+  }
   
   public static function posInput<T:{ x:Float, y:Float }>(label:String, target:T, format:String = "%.3f", flags:ImGuiInputTextFlags = 0) {
-    var vv = _arrSingle2;
+    var vv = arrSingle2;
     vv[0] = target.x;
     vv[1] = target.y;
     ImGui.inputFloat2(label, vv, format, flags);
@@ -138,7 +149,7 @@ class ImGuiTools {
   }
   
   public static function posInputObj(label:String, target:h2d.Object, format:String = "%.3f", flags:ImGuiInputTextFlags = 0) {
-    var vv = _arrSingle2;
+    var vv = arrSingle2;
     vv[0] = target.x;
     vv[1] = target.y;
     ImGui.inputFloat2(label, vv, format, flags);
@@ -147,7 +158,7 @@ class ImGuiTools {
   }
   
   public static function posInput3<T:{ x:Float, y:Float, z:Float }>(label:String, target:T, format:String = "%.3f", flags:ImGuiInputTextFlags = 0) {
-    var vv = _arrSingle3;
+    var vv = arrSingle3;
     vv[0] = target.x;
     vv[1] = target.y;
     vv[2] = target.z;
@@ -158,7 +169,7 @@ class ImGuiTools {
   }
   
   public static function posInput4<T:{ x:Float, y:Float, z:Float, w:Float }>(label:String, target:T, format:String = "%.3f", flags:ImGuiInputTextFlags = 0) {
-    var vv = _arrSingle4;
+    var vv = arrSingle4;
     vv[0] = target.x;
     vv[1] = target.y;
     vv[2] = target.z;
@@ -171,7 +182,7 @@ class ImGuiTools {
   }
   
   public static function posInputObj3(label:String, target:h3d.scene.Object, format:String = "%.3f", flags:ImGuiInputTextFlags = 0) {
-    var vv = _arrSingle3;
+    var vv = arrSingle3;
     vv[0] = target.x;
     vv[1] = target.y;
     vv[2] = target.z;
@@ -182,9 +193,9 @@ class ImGuiTools {
   }
   
   public static function sliderDouble(label : String, v : Single, v_min : Single, v_max : Single, format : String = "%.3f", power : Single = 1.0):Float {
-    _arrSingle1[0] = v;
-    ImGui.sliderFloat(label, _arrSingle1, v_min, v_max, format, power);
-    return _arrSingle1[0];
+    arrSingle1[0] = v;
+    ImGui.sliderFloat(label, arrSingle1, v_min, v_max, format, power);
+    return arrSingle1[0];
   }
   #end
 }

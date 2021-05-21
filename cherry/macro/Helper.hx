@@ -40,6 +40,7 @@ class Helper {
     hxd.res.Config.pairedExtensions.set("gif", "png");
     hxd.res.Config.extensions.set("atl", "cherry.res.AtlAtlas");
     hxd.res.Config.extensions.set("json", "cherry.res.JsonFile");
+    hxd.fs.Convert.register(new cherry.fs.Convert.GifConvert());
     
     // Register converts
     Compiler.include("cherry.res.GifImage");
