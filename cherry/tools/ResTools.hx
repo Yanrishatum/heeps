@@ -29,7 +29,9 @@ class ResTools {
     if( file == null )
       file = "res";
     // TODO: Config stuff
+    #if (!display || heeps_make_pak_on_display)
     hxd.fmt.pak.Build.make(sys.FileSystem.fullPath(file), file, true);
+    #end
     
     if (haxe.macro.Context.definedValue("target.name") == "js") {
       var maxPaks = 1;
