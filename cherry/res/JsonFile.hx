@@ -14,7 +14,7 @@ class JsonFile extends Resource {
   }
   
   public function toParticles(?parent:h2d.Object):h2d.Particles {
-    var json = toJson();
+    var json:Dynamic = toJson();
     if (json.type != "particles2D") throw "Not a particles json!";
     var parts = new h2d.Particles(parent);
     parts.load(json, entry.path);

@@ -28,20 +28,13 @@ class EventInteractive extends Interactive
   
   override public function handleEvent(e:Event)
   {
-		if( parentMask != null && checkBounds(e) ) {
-			var p = parentMask;
+		if( maskedBounds != null && checkBounds(e) ) {
+			var p = maskedBounds;
 			var pt = new h2d.col.Point(e.relX, e.relY);
 			localToGlobal(pt);
-			var saveX = pt.x, saveY = pt.y;
-			while( p != null ) {
-				pt.x = saveX;
-				pt.y = saveY;
-				var pt = p.globalToLocal(pt);
-				if( pt.x < 0 || pt.y < 0 || pt.x > p.width || pt.y > p.height ) {
-					e.cancel = true;
-					return;
-				}
-				p = @:privateAccess p.parentMask;
+			if( pt.x < maskedBounds.xMin || pt.y < maskedBounds.yMin || pt.x > maskedBounds.xMax || pt.y > maskedBounds.yMax ) {
+				e.cancel = true;
+				return;
 			}
 		}
 		if(shape == null && isEllipse && checkBounds(e) ) {

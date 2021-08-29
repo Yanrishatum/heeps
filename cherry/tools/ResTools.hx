@@ -17,10 +17,10 @@ class ResTools {
     ```
     
     @param file Optional resource folder path. Defaults to value in `resourcesPath` or `res`.
-    @param onReady Required callback when resources are loaded. Because JS can't load pak instantly,
+    @param onReady `Void->Void` Required callback when resources are loaded. Because JS can't load pak instantly,
     it is done asynchronously and callback is called when Res is initialised.
     Called instantly on non-JS target.
-    @param onProgress Optional callback for loading progress. Passed value is a percentile from 0 to 1.
+    @param onProgress `Float->Void` Optional callback for loading progress. Passed value is a percentile from 0 to 1.
     Never called on non-JS target.
   **/
   public static macro function initPakAuto(?file:String, onReady:ExprOf<Void->Void>, ?onProgress:ExprOf<Float->Void>) {
