@@ -36,7 +36,7 @@ class SDFLib extends hxsl.Shader {
     
     function sdSegment(pos:Vec2, a:Vec2, b:Vec2):Float {
       var pa = pos - a;
-      var ba = b - b;
+      var ba = b - a;
       var h = clamp(dot(pa, ba) / dot(ba, ba), 0, 1);
       return length(pa - ba*h);
     }
