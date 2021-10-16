@@ -122,8 +122,6 @@ class Extensions
           if( rotation == 0 ) {
             cr = 1.; sr = 0.;
             matA = scaleX;
-            // matB = scaleX * skewY;
-            // matC = scaleY * skewX;
             matB = 0;
             matC = 0;
             matD = scaleY;
@@ -135,16 +133,8 @@ class Extensions
             matC = scaleY * -sr;
             matD = scaleY * cr;
           }
-          // if ( skewX != 0 || skewY != 0 ) {
-          //   var tanX = Math.tan(skewX);
-          //   var tanY = Math.tan(skewY);
-          //   var tmpA = matA;
-          //   var tmpB = matB;
-          //   var tmpC = matC;
-          //   var tmpD = matD;
-          // }
-          absX = x - originX;
-          absY = y - originY;
+          absX = x - (originX * matA + originY * matC);
+          absY = y - (originX * matB + originY * madD);
         } else {
           // M(rel) = S . R . T
           // M(abs) = M(rel) . P(abs)
@@ -165,10 +155,8 @@ class Extensions
             matC = tmpC * parent.matA + tmpD * parent.matC;
             matD = tmpC * parent.matB + tmpD * parent.matD;
           }
-          var ox = x - originX;
-          var oy = y - originY;
-          absX = ox * parent.matA + oy * parent.matC + parent.absX;
-          absY = ox * parent.matB + oy * parent.matD + parent.absY;
+          absX = x * parent.matA + y * parent.matC + parent.absX - (originX * matA + originY * matC);
+          absY = x * parent.matB + y * parent.matD + parent.absY - (originX * matB + originY * matD);
         }
       }
     }

@@ -29,6 +29,41 @@ class Music {
     if (fade) channel.fadeTo(1, FADE_TIME);
   }
   
+  public static function pause(fade:Bool = true) {
+    if (channel != null && !channel.pause) {
+      if (fade) {
+        channel.fadeTo(0, FADE_TIME, () -> channel.pause = true);
+      } else {
+        channel.pause = false;
+      }
+    }
+  }
+  
+  public static function unpause(fade:Bool = true) {
+    if (channel != null && channel.pause) {
+      if (fade) {
+        channel.position -= FADE_TIME * 2;
+        channel.pause = false;
+        channel.fadeTo(1, FADE_TIME);
+      } else {
+        channel.pause = false;
+      }
+    }
+  }
+  
+  public static function unpauseAt(time:Float, fade:Bool = true) {
+    if (channel != null && channel.pause) {
+      if (fade) {
+        channel.position = time - FADE_TIME;
+        channel.pause = false;
+        channel.fadeTo(1, FADE_TIME);
+      } else {
+        channel.position = time;
+        channel.pause = false;
+      }
+    }
+  }
+  
   public static function transit(res:Sound, jingle:Sound, fadeCurrent:Bool = true, fadeNew:Bool = false) {
     if (res == null) {
       stop(fadeCurrent||fadeNew);

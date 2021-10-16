@@ -28,7 +28,7 @@ class AtlasData {
   public inline function getAnimTiles(name:String):Array<Tile> return anims[name].tiles;
   public inline function getAnimTile(anim:String, index:Int):Tile return anims[anim].tiles[index];
   
-  #if !hide_plugin @:noCompletion #end
+  #if (!hide_plugin && !cherry_editor) @:noCompletion #end
   public function addSprite(s:AtlasSprite, index:Int = -1) {
     sprites.push(s);
     var anim = anims.get(s.id);
@@ -54,7 +54,7 @@ class AtlasData {
     }
   }
   
-  #if !hide_plugin @:noCompletion #end
+  #if (!hide_plugin && !cherry_editor) @:noCompletion #end
   public function removeSprite(s:AtlasSprite) {
     sprites.remove(s);
     var anim = anims.get(s.id);
@@ -73,7 +73,7 @@ class AtlasData {
     }
   }
   
-  #if !hide_plugin @:noCompletion #end
+  #if (!hide_plugin && !cherry_editor) @:noCompletion #end
   public function renameSprite(s:AtlasSprite, newId:String) {
     if (s.id == newId) return; // no point
     var anim = anims.get(s.id);
@@ -104,7 +104,7 @@ class AtlasData {
     names[s.fid] = s;
   }
   
-  #if !hide_plugin @:noCompletion #end
+  #if (!hide_plugin && !cherry_editor) @:noCompletion #end
   public function renameAnim(anim:AtlasAnim, newId:String) {
     if (anim.id == newId) return; // no point
     var ref = anims.get(newId);
@@ -125,7 +125,7 @@ class AtlasData {
     }
   }
   
-  #if !hide_plugin @:noCompletion #end
+  #if (!hide_plugin && !cherry_editor) @:noCompletion #end
   public function moveSprite(s:AtlasSprite, newIndex:Int) {
     if (s.index == newIndex) return;
     var anim = anims.get(s.id);
@@ -170,7 +170,15 @@ class AtlasData {
     }
   }
   
-  inline function loadV0(data:Dynamic, v:Int) {
+  public function setTexture(tex:Tile) {
+    this.texture = tex;
+    for (s in sprites) {
+      s.tile = tex.sub(s.x, s.y, s.width, s.height, s.originX, s.originY);
+    }
+    for (a in anims) a.syncTiles();
+  }
+  
+  function loadV0(data:Dynamic, v:Int) {
     texturePath = data.texture;
     for (s in (data.sprites:Array<Dynamic>)) {
       var s = AtlasSprite.load(s, v);
@@ -272,7 +280,7 @@ class AtlasSprite {
     };
   }
   
-  #if hide_plugin
+  #if (hide_plugin || cherry_editor)
   public function clone() {
     var s = new AtlasSprite(id);
     s.x = x;

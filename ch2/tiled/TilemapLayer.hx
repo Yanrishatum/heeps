@@ -1,5 +1,6 @@
 package ch2.tiled;
 
+import h2d.col.Point;
 import h2d.Object;
 import h2d.SpriteBatch;
 import ch2.SpriteBatchExt;
@@ -17,7 +18,6 @@ class TilemapLayer extends ch2.BatchDrawer {
     this.map = map;
     this.layer = layer;
     super(parent);
-    
     for (c in layer.tileChunks) {
       addChunk(c);
     }

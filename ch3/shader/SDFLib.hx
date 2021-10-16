@@ -122,6 +122,17 @@ class SDFLib extends hxsl.Shader {
       return sdEdge(msdfUnpack(distance), edgeDistance, 0.5);
     }
     
+    // Alternative sdEdge method. May or may not produce better results.
+    // See: https://www.shadertoy.com/view/llK3Wm
+    function sdEdgeAlt(distance:Float, edgeDistance:Float):Float {
+      var relDist = distance - edgeDistance;
+      return clamp((relDist / fwidth(relDist) + edgeDistance), 0.0, 1.0);
+    }
+    
+    function msdfEdgeAlt(distance:Vec3, edgeDistance:Float):Float {
+      return sdEdgeAlt(msdfUnpack(distance), edgeDistance);
+    }
+    
   }
   
 }

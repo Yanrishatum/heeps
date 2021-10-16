@@ -4,6 +4,7 @@ package cherry.soup;
 // Warning: I use Spitko fork of imgui, as it has more features.
 //==============================================================
 
+import haxe.io.Bytes;
 import h3d.mat.Texture;
 import h3d.Vector;
 import h2d.col.Point;
@@ -23,6 +24,7 @@ private class ImVec2Impl {
   public function set(x:Float, y:Float) {
     this.x = x;
     this.y = y;
+    return this;
   }
 }
 
@@ -39,12 +41,14 @@ private class ImVec4Impl {
     this.y = y;
     this.z = z;
     this.w = w;
+    return this;
   }
   public function setColor(c:Int) {
     this.x = (c >> 16 & 0xff) / 0xff;
     this.y = (c >> 8  & 0xff) / 0xff;
     this.z = (c       & 0xff) / 0xff;
     this.w = (c >> 24 & 0xff) / 0xff;
+    return this;
   }
 }
 
@@ -160,11 +164,6 @@ abstract ImGuiTools(imgui.ImGui) {
     return v;
   }
   
-  public static function sliderInt(label:String, val:Int, v_min:Int, v_max:Int, format = "%d"):Int {
-    ImGui.sliderInt(label, arrInt1.set1(val), v_min, v_max, format);
-    return arrInt1.x;
-  }
-  
   public static function posInput<T:{ x:Float, y:Float }>(label:String, target:T, format:String = "%.3f", flags:ImGuiInputTextFlags = 0) {
     var vv = arrSingle2;
     ImGui.inputFloat2(label, vv.set2(target.x, target.y), format, flags);
@@ -208,9 +207,89 @@ abstract ImGuiTools(imgui.ImGui) {
     target.z = vv.z;
   }
   
-  public static function sliderDouble(label : String, v : Single, v_min : Single, v_max : Single, format : String = "%.3f", power : Single = 1.0):Float {
-    ImGui.sliderFloat(label, arrSingle1.set1(v), v_min, v_max, format, power);
-    return arrSingle1.x;
+  public static function sliderDouble(label : String, v : Single, v_min : Single, v_max : Single, format : String = "%.3f", flags : ImGuiSliderFlags = 0):Float {
+    ImGui.sliderFloat(label, v, v_min, v_max, format, flags);
+    return v;
   }
+  
+  static var textCache:hl.Bytes = new hl.Bytes(1024*2);
+  static var textCacheSize:Int = 1024*2;
+  public static function inputText(label:String, text:hl.Ref<String>, flags:ImGuiInputTextFlags = 0, maxSize:Int = 1024):Bool @:privateAccess {
+    maxSize <<= 1;
+    var txt = text.get();
+    if (txt == null) txt = "";
+    if (maxSize < ((txt.length+128)<<1)) {
+      // Add extra spacing in case text is changed beyond current size
+      maxSize = (txt.length+128)<<1;
+    }
+    if (textCacheSize < maxSize) {
+      textCache = new hl.Bytes(maxSize);
+      textCacheSize = maxSize;
+    }
+    // Convert utf-16 text into utf-8. Sadly HL API don't let me to specify into which Bytes it should write it, hence extra blitting.
+    var size = 0;
+    var u8 = txt.bytes.utf16ToUtf8(txt.length<<1, size);
+    textCache.blit(0, u8, 0, size);
+    textCache[size] = 0;
+    if (ImGui.inputText(label, textCache, textCacheSize, flags)) {
+      // Only convert back if changed.
+      var u16 = textCache.utf8ToUtf16(0, size);
+      text.set(String.__alloc__(u16, size>>1));
+      return true;
+    }
+    return false;
+  }
+  
+  public static function inputTextArray(label, texts:Array<String>, flags:ImGuiInputTextFlags = 0, maxSize: Int = 1024) {
+    if (ImGui.collapsingHeader(label, ImGuiTreeNodeFlags.DefaultOpen)) {
+      var idx = 0;
+      while (idx < texts.length) {
+        IG.pushID3(idx);
+        var txt = texts[idx];
+        if (IG.inputText("[" + idx +"]", txt, flags, maxSize)) {
+          texts[idx] = txt;
+        }
+        IG.sameLine(0, 3);
+        if (ImGui.smallButton("-")) {
+          texts.splice(idx, 1);
+          idx--;
+        }
+        IG.sameLine(0, 3);
+        if (ImGui.smallButton("+")) {
+          texts.insert(idx+1, "");
+        }
+        ImGui.popID();
+        idx++;
+      }
+      if (texts.length == 0) {
+        IG.text("(Empty array)");
+        IG.sameLine(0, 3);
+        if (IG.smallButton("+")) {
+          texts.push("");
+        }
+      }
+    }
+  }
+  
+  public static function beginSimpleDock(dock_id:String, width:Int, height:Int) {
+    IG.pushStyleVar(ImGuiStyleVar.WindowRounding, 0);
+    IG.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+    IG.pushStyleVar2(ImGuiStyleVar.WindowPadding, IG.point.set(0,0));
+    IG.setNextWindowPos(IG.point.set(0, 0));
+    IG.setNextWindowSize(IG.point.set(width, height));
+    IG.setNextWindowBgAlpha(0);
+    IG.begin(dock_id, null, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.MenuBar
+        | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove
+        | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus);
+    IG.popStyleVar(3);
+    var dockID = IG.getID(dock_id);
+    IG.dockSpace(dockID, null, ImGuiDockNodeFlags.NoDockingInCentralNode | ImGuiDockNodeFlags.PassthruCentralNode);
+    
+  }
+  
+  public static inline function endSimpleDock() {
+    IG.end();
+  }
+  
 }
 #end
