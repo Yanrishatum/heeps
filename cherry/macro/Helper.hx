@@ -14,9 +14,10 @@ class Helper {
   public static function init()
   {
     // Can't use that in HIDE plugins.
-    if (Context.defined("hide_plugin")) return;
+    if (Context.defined("hide_plugin") || Context.defined("heeps_macro")) return;
     
     Compiler.define("heeps_macro", "1");
+    if (Context.defined("display")) return;
     var fixups:Array<String> = new Array();
     for (k in hxd.res.Config.extensions.keys())
     {

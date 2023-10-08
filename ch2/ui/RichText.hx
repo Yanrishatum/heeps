@@ -1,5 +1,6 @@
 package ch2.ui;
 
+import hxd.BufferFormat;
 import h2d.HtmlText;
 import h2d.impl.BatchDrawState;
 import h3d.prim.Primitive;
@@ -38,7 +39,7 @@ class RichTextContent extends Primitive {
   }
   
   override public function triCount() {
-    return if (buffer == null) vertices >> 1 else buffer.totalVertices() >> 1;
+    return if (buffer == null) vertices >> 1 else buffer.vertices >> 1;
   }
   
   public function clear() {
@@ -198,7 +199,7 @@ class RichTextContent extends Primitive {
       clear();
     if (base.length > 0) {
       doCompose();
-      buffer = h3d.Buffer.ofFloats(composed, STRIDE, [Quads, RawFormat]);
+      buffer = h3d.Buffer.ofFloats(composed, BufferFormat.H2D, []);
       dirty = false;
     }
   }
@@ -211,7 +212,7 @@ class RichTextContent extends Primitive {
         alloc(h3d.Engine.getCurrent());
       else {
         doCompose();
-        buffer.uploadVector(composed, 0, vertices);
+        buffer.uploadFloats(composed, 0, vertices);
         dirty = false;
       }
     }
@@ -540,6 +541,7 @@ class RichText extends Drawable {
   function newLine() {
     ensureFinalized();
     lastLine = new TextLine();
+    lastLine.align = defaultFormat.align;
     if (lines.length != 0) {
       var prev = lines[lines.length - 1];
     }
@@ -665,6 +667,7 @@ class RichText extends Drawable {
         var sdf = new SignedDistanceField();
         sdf.channel = channel;
         sdf.alphaCutoff = alphaCutoff;
+        sdf.autoSmoothing = smoothing == -1;
         sdf.smoothing = smoothing;
         batch.addShader(sdf);
     }

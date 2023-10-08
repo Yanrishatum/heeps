@@ -140,7 +140,7 @@ class ShiftAppear extends ApearEffectBase {
   override function applyObject(dt:Float, o:Object, ctx:RenderContext, node:NodeRange)
   {
     if (alpha) o.alpha = dt;
-    else o.alpha = dt < 1 ? 0 : 1;
+    else o.alpha = dt <= 0 ? 0 : 1;
     dt = 1 - dt;
     o.x = cache.get() + xOff * dt;
     o.y = cache.get() + yOff * dt;
@@ -149,7 +149,7 @@ class ShiftAppear extends ApearEffectBase {
   override function applyTile(dt:Float, content:RichTextContent, ctx:RenderContext, index:Int, node:NodeRange)
   {
     if (alpha) content.mulAlpha(index, dt);
-    else content.mulAlpha(index, dt < 1 ? 0 : 1);
+    else content.mulAlpha(index, dt <= 0 ? 0 : 1);
     dt = 1 - dt;
     content.offsetXY(index, xOff * dt, yOff * dt);
   }

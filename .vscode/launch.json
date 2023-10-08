@@ -8,18 +8,24 @@
       "name": "HashLink (launch)",
       "request": "launch",
       "type": "hl",
-      "hxml": "build.hxml",
-      "cwd": "${workspaceRoot}",
-      "preLaunchTask": "Heeps_Build"
+      // "hxml": "build.hxml",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": {
+        "type": "haxe",
+        "args": "active configuration"
+      }
     },
     {
       "name": "HashLink (attach)",
       "request": "attach",
       "port": 6112,
       "type": "hl",
-      "hxml": "build.hxml",
-      "cwd": "${workspaceRoot}",
-      "preLaunchTask": "Heeps_Build"
+      // "hxml": "build.hxml",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": {
+        "type": "haxe",
+        "args": "active configuration"
+      }
     }
   ]
 }

@@ -2,23 +2,26 @@ package cherry.soup;
 
 import haxe.macro.Expr;
 using haxe.macro.Tools;
-macro function wref(expr:Expr, names:Array<Expr>):Expr {
-  var tmps:Array<String> = [];
-  var tmpDecl:Array<Expr> = [];
+
+/**
+  Usage: `quickSet(IG.doStuff(_), IG.arrDouble2, x, y)`
+**/
+macro function quickSet(expr: Expr, toArr: Expr, names: Array<Expr>): Expr {
+  var tmpDecl:Array<Expr> = [macro var __tmpArr = $toArr];
   var tmpAssign:Array<Expr> = [];
-  for (n in names) {
-    var tmpName = "__tmp_" + tmps.length;
-    tmps.push(tmpName);
-    tmpDecl.push(macro var $tmpName = $n);
-    tmpAssign.push(macro $n = $i{tmpName});
+  for (i in 0...names.length) {
+    var n = names[i];
+    tmpDecl.push(macro __tmpArr[$v{i}] = @:privateAccess $n);
+    tmpAssign.push(macro @:privateAccess $n = __tmpArr[$v{i}]);
   }
+  
   function repl(e:Expr) {
     switch (e.expr) {
       case ECall(e, params):
         repl(e);
         for (p in params) repl(p);
       case EConst(Constant.CIdent("_")), EConst(Constant.CIdent("__")):
-        e.expr = EConst(CIdent(tmps.shift()));
+        e.expr = EConst(CIdent("__tmpArr"));
       case EField(e, field):
         repl(e);
       case EParenthesis(e):
@@ -33,4 +36,5 @@ macro function wref(expr:Expr, names:Array<Expr>):Expr {
   var result = tmpDecl.concat(tmpAssign);
   result.push(macro result);
   return macro $b{result};
+  
 }

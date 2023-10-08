@@ -4,4 +4,7 @@ game.hl
 *.js.map
 *.bat
 .tmp
+imgui.ini
+NodeEditor.json
+samples/res
 !plugins/bin/*

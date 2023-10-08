@@ -1,5 +1,6 @@
 package cherry.fs;
 
+import hxd.fs.FileInput;
 import hxd.net.BinaryLoader;
 import hxd.impl.ArrayIterator;
 import hxd.fs.LoadedBitmap;
@@ -43,18 +44,18 @@ class ManifestEntry extends FileEntry
     }
   }
   
-  override public function getSign():Int
-  {
-    #if sys
-    var old = if( fio == null ) -1 else fio.tell();
-    open();
-    var i = fio.readInt32();
-    if( old < 0 ) close() else fio.seek(old, SeekBegin);
-    return i;
-    #else
-    return bytes.get(0) | (bytes.get(1) << 8) | (bytes.get(2) << 16) | (bytes.get(3) << 24);
-    #end
-  }
+  // override public function getSign():Int
+  // {
+  //   #if sys
+  //   var old = if( fio == null ) -1 else fio.tell();
+  //   open();
+  //   var i = fio.readInt32();
+  //   if( old < 0 ) close() else fio.seek(old, SeekBegin);
+  //   return i;
+  //   #else
+  //   return bytes.get(0) | (bytes.get(1) << 8) | (bytes.get(2) << 16) | (bytes.get(3) << 24);
+  //   #end
+  // }
   
   override public function getBytes():Bytes
   {
@@ -65,59 +66,73 @@ class ManifestEntry extends FileEntry
     #end
   }
   
-  override public function open()
-  {
+  // override public function open()
+  // {
+  //   #if sys
+  //   if (fio == null)
+  //     fio = sys.io.File.read(file);
+  //   else
+  //     fio.seek(0, SeekBegin);
+  //   #else 
+  //   readPos = 0;
+  //   #end
+  // }
+  
+  override public function readBytes(out:Bytes, outPos:Int, pos:Int, len:Int):Int {
     #if sys
-    if (fio == null)
-      fio = sys.io.File.read(file);
-    else
-      fio.seek(0, SeekBegin);
-    #else 
-    readPos = 0;
+    if (fio == null) fio = sys.io.File.read(file); // Fuck closing I suppose.
+    fio.seek(pos, SeekBegin);
+    return fio.readBytes(out, outPos, len);
+    #else
+    if (bytes == null) return 0;
+    if (pos + len > bytes.length) len = bytes.length - pos;
+    out.blit(outPos, bytes, pos, len);
+    return len;
     #end
+    // return super.readBytes(out, outPos, pos, len);
   }
   
-  override public function skip(nbytes:Int)
-  {
-    #if sys
-    fio.seek(nbytes, SeekCur);
-    #else
-    readPos += nbytes;
-    if (bytes.length < readPos) readPos = bytes.length;
-    #end
-  }
+  // override public function skip(nbytes:Int)
+  // {
+  //   #if sys
+  //   fio.seek(nbytes, SeekCur);
+  //   #else
+  //   readPos += nbytes;
+  //   if (bytes.length < readPos) readPos = bytes.length;
+  //   #end
+  // }
   
-  override public function readByte():Int
-  {
-    #if sys
-    return fio.readByte();
-    #else
-    return bytes.get(readPos++);
-    #end
-  }
+  // override public function readByte():Int
+  // {
+  //   #if sys
+  //   return fio.readByte();
+  //   #else
+  //   return bytes.get(readPos++);
+  //   #end
+  // }
   
-  override public function read(out:Bytes, pos:Int, size:Int)
-  {
-    #if sys
-    fio.readFullBytes(out, pos, size);
-    #else
-    out.blit(pos, bytes, readPos, size);
-    readPos += size;
-    #end
-  }
+  // override public function read(out:Bytes, pos:Int, size:Int)
+  // {
+  //   #if sys
+  //   fio.readFullBytes(out, pos, size);
+  //   #else
+  //   out.blit(pos, bytes, readPos, size);
+  //   readPos += size;
+  //   #end
+  // }
   
-  override public function close()
-  {
-    #if sys
-    if (fio != null)
-    {
-      fio.close();
-      fio = null;
-    }
-    #else
-    readPos = 0;
-    #end
-  }
+  // override public function close()
+  // {
+  //   #if sys
+  //   if (fio != null)
+  //   {
+  //     fio.close();
+  //     fio = null;
+  //   }
+  //   #else
+  //   readPos = 0;
+  //   #end
+  // }
   
   public function fancyLoad(onReady:() -> Void, onProgress:(cur:Int, max:Int)->Void)
   {
@@ -249,9 +264,13 @@ class ManifestEntry extends FileEntry
       contents = null;
     }
     #if sys
-    close();
+    if (fio != null) {
+      fio.close();
+      fio = null;
+    }
     #else
     bytes = null;
+    loaded = false;
     #end
   }
   

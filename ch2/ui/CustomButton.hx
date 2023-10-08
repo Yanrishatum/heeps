@@ -1,5 +1,6 @@
 package ch2.ui;
 
+import hxd.Cursor;
 import h2d.Object;
 import h2d.col.Collider;
 
@@ -29,12 +30,22 @@ class CustomButton extends EventInteractive
   **/
   public var simState(default, null):ButtonState = 0xff;
   
+  public var noCursorOnDisabled: Bool = true;
+  var defaultCursor: Cursor;
+  
+  override function set_cursor(c:Null<Cursor>):Null<Cursor> {
+    if (noCursorOnDisabled && !flags.has(ButtonFlags.Disabled)) defaultCursor = c;
+    return super.set_cursor(c);
+  }
+  
   public function new(width:Float, height:Float, ?parent:Object, ?shape:Collider, ?views:Array<IButtonStateView>)
   {
     super(width, height, parent, shape);
     flags = None;
     state = Idle;
+    defaultCursor = cursor;
     this.views = views != null ? views : [];
+    if (this.views.length == 0 && Std.isOfType(this, IButtonStateView)) this.views.push(cast this);
     for (v in this.views) {
       // if (Std.is(v, Object) && cast (v:Object) != this) {
       //   addChild(cast v);
@@ -97,6 +108,9 @@ class CustomButton extends EventInteractive
   {
     var s = simState == 0xff ? state : simState;
     for (v in views) v.setState(s, flags);
+    if (noCursorOnDisabled) {
+      cursor = flags.has(ButtonFlags.Disabled) ? Default : defaultCursor;
+    }
   }
   
 }
@@ -148,6 +162,15 @@ enum abstract ButtonFlags(Int) {
     return (this & flag.toInt()) == flag.toInt();
   }
   
+  public inline function setTo(flag:ButtonFlags, enabled: Bool) {
+    if (enabled) asFlag(this | flag.toInt());
+    else asFlag(this & ~flag.toInt());
+  }
+  
+  public inline function toggle(flag: ButtonFlags) {
+    return asFlag(this ^ flag.toInt());
+  }
+  
   public inline function set(flag:ButtonFlags):ButtonFlags {
     return asFlag(this | flag.toInt());
   }
@@ -163,13 +186,13 @@ enum abstract ButtonFlags(Int) {
 
 enum abstract ButtonState(Int) to Int from Int {
   
-  // Unpressed
+  /** Unpressed **/
   var Idle = 0;
-  // Mouse over
+  /** Mouse over **/
   var Hover = 1;
-  // Pressed
+  /** Pressed */
   var Press = 3;
-  // Pressed, not hovered
+  /** Pressed, not hovered */
   var Hold = 2;
   
 }

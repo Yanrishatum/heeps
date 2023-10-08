@@ -1,7 +1,7 @@
 package ch3.shader;
 
 // Port from https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
-
+// Use `@:import ch3.shader.SDFLib` in your shader to import the functions
 class SDFLib extends hxsl.Shader {
   
   static var SRC = {
@@ -42,11 +42,19 @@ class SDFLib extends hxsl.Shader {
     }
     
     function ndot(a:Vec2, b:Vec2):Float { return a.x*b.x - a.y*b.y; }
-    function sdRhombus(pos:Vec2, b:Vec2):Float {
-      var q = abs(pos);
-      var h = clamp((-2 * ndot(q,b) + ndot(b,b)) / dot(b,b), -1, 1);
-      var d = length(q - .5 * b * vec2(1 - h, 1 + h));
-      return d * sign(q.x * b.y + q.y * b.x - b.x * b.y);
+    
+    function sdRhombus(pos: Vec2, b:Vec2): Float {
+      pos = abs(pos);
+      var h = clamp( ndot(b-2.0*pos,b)/dot(b,b), -1.0, 1.0 );
+      var d = length( pos-0.5*b*vec2(1.0-h,1.0+h) );
+      return d * sign( pos.x*b.y + pos.y*b.x - b.x*b.y );
+    }
+    
+    function sdPie(p: Vec2, c: Vec2, r: Float): Float {
+      p.x = abs(p.x);
+      var l = length(p) - r;
+      var m = length(p-c*clamp(dot(p,c),0.0,r)); // c=sin/cos of aperture
+      return max(l,m*sign(c.y*p.x-c.x*p.y));
     }
     
     // Operations

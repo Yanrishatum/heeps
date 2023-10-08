@@ -9,6 +9,13 @@ class JsonFile extends Resource {
     return haxe.Json.parse(entry.getText());
   }
   
+  // #if json2object
+  // public inline function toObject<T>():T {
+  //   var p = new json2object.JsonParser<T>();
+  //   return p.fromJson(entry.getText(), entry.path);
+  // }
+  // #end
+  
   public inline function getText():String {
     return entry.getText();
   }

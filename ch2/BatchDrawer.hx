@@ -1,5 +1,6 @@
 package ch2;
 
+import hxd.BufferFormat;
 import ch3.shader.MultiTexture2;
 import h2d.Object;
 import h3d.mat.Texture;
@@ -13,6 +14,11 @@ import h2d.impl.BatchDrawState;
 @:access(h2d.Tile)
 private class BatchDrawerContent extends h3d.prim.Primitive {
   public static inline final stride:Int = 9;
+  public static var BUFFER_FORMAT(get,null) : BufferFormat;
+	static inline function get_BUFFER_FORMAT() {
+		if( BUFFER_FORMAT == null ) BUFFER_FORMAT = BufferFormat.make([{ name : "position", type : DVec2 },{ name : "uv", type : DVec2 },{ name : "color", type : DVec4 },{ name: "index", type : DFloat}]);
+		return BUFFER_FORMAT;
+  }
 
   public var tmp:hxd.FloatBuffer;
 
@@ -47,7 +53,7 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
   }
 
   override public function triCount() {
-    return if (buffer == null) Std.int(tmp.length / stride) >> 1 else buffer.totalVertices() >> 1;
+    return if (buffer == null) Std.int(tmp.length / stride) >> 1 else buffer.vertices >> 1;
   }
 
   public inline function addColor(x:Float, y:Float, color:h3d.Vector, t:Tile) {
@@ -230,7 +236,7 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
     if (tmp == null)
       clear();
     if (tmp.length > 0)
-      buffer = h3d.Buffer.ofFloats(tmp, stride, [Quads, RawFormat]);
+      buffer = h3d.Buffer.ofFloats(tmp, BUFFER_FORMAT, []);
     dirty = false;
   }
 
@@ -242,7 +248,7 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
       if (buffer.vertices < nvert)
         alloc(h3d.Engine.getCurrent());
       else {
-        buffer.uploadVector(tmp, 0, nvert);
+        buffer.uploadFloats(tmp, 0, nvert);
         dirty = false;
       }
     }
@@ -251,8 +257,8 @@ private class BatchDrawerContent extends h3d.prim.Primitive {
   public function doRender(ctx:RenderContext, shader, min, len) {
     flush();
     if (buffer != null)
-      state.drawQuads(ctx, shader, buffer, min, len);
-      // state.drawQuads(ctx, buffer, min, len);
+      // state.drawQuads(ctx, shader, buffer, min, len);
+      state.drawQuads(ctx, buffer, min, len);
   }
 }
 
@@ -271,7 +277,8 @@ class BatchDrawer extends Drawable {
     super(parent);
     shader = new MultiTexture2();
     this.content = new BatchDrawerContent();
-    addShader(shader);
+    // TODO: Restore multi-texture support
+    // addShader(shader);
     stateCount = 0;
     curColor = new h3d.Vector(1, 1, 1, 1);
   }

@@ -1,5 +1,6 @@
 package cherry;
 
+import hxd.snd.SoundGroup;
 import hxd.snd.Channel;
 import hxd.snd.ChannelGroup;
 import hxd.res.Sound;
@@ -10,6 +11,8 @@ class Music {
   public static var channelGroup:ChannelGroup;
   static var channel:Channel;
   public static var FADE_TIME:Float = 0.4;
+  
+  public static var soundGroups: Map<String, SoundGroup> = [];
   
   public static function play(res:Sound, fade:Bool = true) {
     if (res == null) {
@@ -27,6 +30,24 @@ class Music {
     current = res;
     channel = current.play(true, fade ? 0 : 1, channelGroup);
     if (fade) channel.fadeTo(1, FADE_TIME);
+  }
+  
+  public static function crossfade(res: Sound) {
+    if (res == current) return;
+    if (res == null) {
+      stop();
+      return;
+    }
+    var pos: Float = 0;
+    if (channel != null) {
+      var old = channel;
+      pos = old.position;
+      old.fadeTo(0, FADE_TIME, () -> old.stop());
+    }
+    current = res;
+    channel = res.play(true, 0, channelGroup);
+    channel.position = pos;
+    channel.fadeTo(1, FADE_TIME);
   }
   
   public static function pause(fade:Bool = true) {
@@ -133,6 +154,10 @@ class Music {
       channel = null;
       current = null;
     }
+  }
+  
+  public static inline function soundGroup(name: String) {
+    return soundGroups[name] ?? (soundGroups[name] = new SoundGroup(name));
   }
   
 }

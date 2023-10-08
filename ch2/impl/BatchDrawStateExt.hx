@@ -1,5 +1,7 @@
 package ch2.impl;
 
+import hxsl.ShaderList;
+import hxsl.Shader;
 import h3d.Indexes;
 import ch3.shader.MultiTexture2;
 import h3d.Buffer;
@@ -7,7 +9,7 @@ import h2d.RenderContext;
 import h3d.mat.Texture;
 
 // Since I fucked up and marked StateEntry as private, I can't just extend it - have to copy entire class, yay.
-@:access(h2d.RenderContext.swapTexture)
+@:access(h2d.RenderContext)
 class BatchDrawStateExt {
 
 	/**
@@ -16,6 +18,8 @@ class BatchDrawStateExt {
 		Always null after state initialization or after `clear` call.
 	**/
 	public var currentTexture(get, never) : h3d.mat.Texture;
+	
+	public var currentShader(get, never): hxsl.ShaderList;
 	/**
 		A total amount of vertices added to the BatchDrawState.
 	**/
@@ -28,7 +32,7 @@ class BatchDrawStateExt {
 		Create a new BatchDrawState instance.
 	**/
 	public function new() {
-		this.head = this.tail = new StateEntry(null);
+		this.head = this.tail = new StateEntry(null, null);
 		this.totalCount = 0;
 	}
 
@@ -37,8 +41,8 @@ class BatchDrawStateExt {
 		@param tile A Tile containing a texture that should be used for the next set of vertices. Does nothing if `null`.
 	**/
 	public inline function setTile( tile : h2d.Tile ) {
-		if ( tile != null ) return setTexture(tile.getTexture());
-		else return 0;
+		if ( tile != null ) setTexture(tile.getTexture());
+		return 0;
 	}
 
 	/**
@@ -47,26 +51,23 @@ class BatchDrawStateExt {
 	**/
 	public function setTexture( texture : h3d.mat.Texture ) {
 		if ( texture != null ) {
-      if (tail.texture == null) {
+			if (tail.texture == null || tail.count == 0) {
 				tail.texture = texture;
-				return 0;
-			} else if (tail.texture != texture && tail.textures.indexOf(texture) == -1) {
-        if (tail.textures.length < 7) {
-					tail.textures.push(texture);
-					return tail.textures.length;
-				}
-        else {
-          var cur = tail;
-          if ( cur.count == 0 ) cur.set(texture);
-          else if ( cur.next == null ) cur.next = tail = new StateEntry(texture);
-          else tail = cur.next.set(texture);
-					return 0;
-        }
-      } else {
-				if (tail.texture != texture) return tail.textures.indexOf(texture) + 1;
+			} else if (tail.texture != texture) {
+				var cur = tail;
+				if ( cur.next == null ) cur.next = tail = new StateEntry(texture, cur.shader);
+				else tail = cur.next.set(texture, cur.shader);
 			}
 		}
-		return 0;
+	}
+	
+	public function setShader(shader: ShaderList) {
+		if (tail.shader != shader) {
+			var cur = tail;
+			if (cur.count == 0) cur.shader = shader;
+			else if (cur.next == null) cur.next = tail = new StateEntry(cur.texture, shader);
+			else tail = cur.next.set(cur.texture, shader);
+		}
 	}
 
 	/**
@@ -85,7 +86,7 @@ class BatchDrawStateExt {
 	public function clear() {
 		var state = head;
 		do {
-			state.textures = [];
+			state.shader = null;
 			state = state.next;
 		} while ( state != null );
 		tail = head;
@@ -102,18 +103,22 @@ class BatchDrawStateExt {
 
 		When `offset` and `length` are not provided or are default values, slightly faster rendering routine is used.
 	**/
-	public function drawQuads( ctx : RenderContext, shader:MultiTexture2, buffer : Buffer, offset = 0, length = -1 ) {
+	public function drawQuads( ctx : RenderContext, buffer : Buffer, offset = 0, length = -1 ) {
 		var state = head;
 		var last = tail.next;
 		var engine = ctx.engine;
 		var stateLen : Int;
 		inline function toQuads( count : Int ) return count >> 1;
-		
+		var topShader = ctx.baseShaderList;
+		while (topShader.next != null) topShader = topShader.next;
 		if ( offset == 0 && length == -1 ) {
 			// Skip extra logic when not restraining rendering
 			do {
+				if (state.shader != topShader.next) {
+					topShader.next = state.shader;
+					ctx.initShaders(ctx.baseShaderList);
+				}
 				ctx.swapTexture(state.texture);
-        state.fill(shader);
 				stateLen = toQuads(state.count);
 				engine.renderQuadBuffer(buffer, offset, stateLen);
 				offset += stateLen;
@@ -127,8 +132,11 @@ class BatchDrawStateExt {
 				if ( caret + stateLen >= offset ) {
 					var stateMin = offset >= caret ? offset : caret;
 					var stateLen = length > stateLen ? stateLen : length;
+					if (state.shader != topShader.next) {
+						topShader.next = state.shader;
+						ctx.initShaders(ctx.baseShaderList);
+					}
 					ctx.swapTexture(state.texture);
-          state.fill(shader);
 					engine.renderQuadBuffer(buffer, stateMin, stateLen);
 					length -= stateLen;
 					if ( length == 0 ) break;
@@ -149,18 +157,23 @@ class BatchDrawStateExt {
 
 		When `offset` and `length` are not provided or are default values, slightly faster rendering routine is used.
 	**/
-	public function drawIndexed( ctx : RenderContext, shader:MultiTexture2, buffer : Buffer, indices : Indexes, offset : Int = 0, length : Int = -1 ) {
+	public function drawIndexed( ctx : RenderContext, buffer : Buffer, indices : Indexes, offset : Int = 0, length : Int = -1 ) {
 		var state = head;
 		var last = tail.next;
 		var engine = ctx.engine;
 		var stateLen : Int;
 		inline function toTris( count : Int ) return Std.int(count / 3);
+		var topShader = ctx.baseShaderList;
+		while (topShader.next != null) topShader = topShader.next;
 
 		if ( offset == 0 && length == -1 ) {
 			// Skip extra logic when not restraining rendering
 			do {
+				if (state.shader != topShader.next) {
+					topShader.next = state.shader;
+					ctx.initShaders(ctx.baseShaderList);
+				}
 				ctx.swapTexture(state.texture);
-        state.fill(shader);
 				stateLen = toTris(state.count);
 				engine.renderIndexed(buffer, indices, offset, stateLen);
 				offset += stateLen;
@@ -174,8 +187,11 @@ class BatchDrawStateExt {
 				if ( caret + stateLen >= offset ) {
 					var stateMin = offset >= caret ? offset : caret;
 					var stateLen = length > stateLen ? stateLen : length;
+					if (state.shader != topShader.next) {
+						topShader.next = state.shader;
+						ctx.initShaders(ctx.baseShaderList);
+					}
 					ctx.swapTexture(state.texture);
-          state.fill(shader);
 					engine.renderIndexed(buffer, indices, stateMin, stateLen);
 					length -= stateLen;
 					if ( length == 0 ) break;
@@ -188,6 +204,7 @@ class BatchDrawStateExt {
 
 
 	inline function get_currentTexture() return tail.texture;
+	inline function get_currentShader() return tail.shader;
 
 }
 
@@ -197,7 +214,8 @@ private class StateEntry {
 		Texture associated with draw state instance.
 	**/
   public var texture:Texture;
-	public var textures : Array<Texture>;
+	
+	public var shader: ShaderList;
 	/**
 		A size of batch state.
 	**/
@@ -206,30 +224,32 @@ private class StateEntry {
 
 	public var next:StateEntry;
 
-	public function new( texture : Texture ) {
-    this.texture = texture;
-		this.textures = [];
-		this.count = 0;
+	public function new( texture : Texture, shader: ShaderList ) {
+		// this.textures = [];
+		// inline set(texture, extras, extrasCount);
+		inline set(texture, shader);
 	}
 
-	public function set( texture : h3d.mat.Texture ) : StateEntry {
+	public function set( texture : Texture, shader: ShaderList ) : StateEntry {
     this.texture = texture;
-		this.textures = [];
+		// for (i in 0...extrasCount) textures[i] = extras[i];
+		// this.textureCount = extrasCount;
 		this.count = 0;
+		this.shader = shader;
 		return this;
 	}
   
-  public function fill(shader:MultiTexture2) {
-    // shader.TEXTURE_COUNT = textures.length;
-    // shader.textures = textures;
-		var filter = texture.filter;
-		var wrap = texture.wrap;
-		for (i in 0...textures.length) {
-			var tex = textures[i];
-			tex.filter = filter;
-			tex.wrap = wrap;
-			shader.textures[i] = tex;
-		}
-  }
+  // public function fill(shader:MultiTexture2) {
+  //   // shader.TEXTURE_COUNT = textures.length;
+  //   // shader.textures = textures;
+	// 	var filter = texture.filter;
+	// 	var wrap = texture.wrap;
+	// 	for (i in 0...textureCount) {
+	// 		var tex = textures[i];
+	// 		tex.filter = filter;
+	// 		tex.wrap = wrap;
+	// 		shader.textures[i] = tex;
+	// 	}
+  // }
 
 }
